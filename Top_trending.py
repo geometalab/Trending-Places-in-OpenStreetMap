@@ -6,20 +6,27 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pylab as plt
 import datetime as dt
 import itertools as it
+import os
 
 MAX_DATE = dt.datetime.now()-dt.timedelta(days=3)
 MIN_PERIOD=7
 THRESHOLD=0.5
 
 
-def plot_graphs(df, trending_daily, file_out, day_from, day_to):
+def plot_graphs(df, trending_daily, day_from, day_to,limit,folder_out=None):
     days = pd.DatetimeIndex(start=day_from, end=day_to, freq='D')
-    pp=PdfPages(file_out)
+    if not folder_out:
+        folder_out=os.path.join(os.path.dirname(os.path.abspath(__file__)),'Tile_log')
+    else:
+        folder_out=os.path.join(folder_out,'Tile_log')
+    if not os.path.exists(folder_out):
+        os.makedirs(folder_out)
+    pp=PdfPages(os.path.join(folder_out,'Trending_Graphs.pdf'))
     for day in days:
         fig=plt.figure()
         ax=fig.add_subplot(111)
         data=trending_daily.get_group(str(day))
-        places,clusters=top_trending(data)
+        places,clusters=top_trending(data,limit)
         for cluster in clusters:
             places.add(max_from_cluster(cluster,data))
         for item in places:
@@ -31,7 +38,8 @@ def plot_graphs(df, trending_daily, file_out, day_from, day_to):
         gp.legend(loc='best',fontsize='xx-small')
         gp.set_title(day,{'fontsize': 'xx-small','verticalalignment': 'bottom'})
         plt.savefig(pp,format='pdf')
-        export_to_csv(places,clusters,data)
+        xpath= os.path.join(folder_out,str(day.date())+'.csv')
+        export_to_csv(places,clusters,data,xpath)
         plt.close()
     pp.close()
 
@@ -146,6 +154,7 @@ def analyze_data(stdin, stdout, date, period, count, graph):
     period=MIN_PERIOD if period<MIN_PERIOD else period
     tile_data=pd.read_csv(stdin,sep=',',parse_dates=['data'],keep_default_na=False)
     tile_data.rename(columns={'data':'date'},inplace=True)
+    tile_data.drop_duplicates(inplace=True)
     tile_data=resample_missing_values(tile_data,date,period)
     tile_data=statistics(tile_data,period)
     high_outliers=tile_data[tile_data['Tscore']>=1.943]
@@ -154,10 +163,10 @@ def analyze_data(stdin, stdout, date, period, count, graph):
     high_outliers.set_index(['lat','lon','countries'],inplace=True)
     high_outliers.sort_values(['date','values'],ascending=False,inplace=True)
     trending_each_day=high_outliers.groupby('date')
-    solo_places,clustered_places=top_trending(trending_each_day.get_group(str(date)))
     if graph:
-        plot_graphs(tile_data,trending_each_day,stdout,date,date)
+        plot_graphs(tile_data,trending_each_day,date,date,count)
     else:
+        solo_places,clustered_places=top_trending(trending_each_day.get_group(str(date)),count)
         export_to_csv(solo_places,clustered_places,trending_each_day,stdout)
 
 if __name__=='main':
