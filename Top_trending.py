@@ -150,7 +150,11 @@ def resample_missing_values(df, date, period):
 
 
 def analyze_data(stdin, stdout, date, period, count, graph):
-    date=MAX_DATE if date>MAX_DATE else date
+    if not date:
+        date=MAX_DATE
+    else:
+        date=dt.datetime.strptime(date,"%Y-%m-%d")
+        date=MAX_DATE if date>MAX_DATE else date
     period=MIN_PERIOD if period<MIN_PERIOD else period
     tile_data=pd.read_csv(stdin,sep=',',parse_dates=['data'],keep_default_na=False)
     tile_data.rename(columns={'data':'date'},inplace=True)
@@ -166,12 +170,12 @@ def analyze_data(stdin, stdout, date, period, count, graph):
     if graph:
         plot_graphs(tile_data,trending_each_day,date,date,count)
     else:
-        solo_places,clustered_places=top_trending(trending_each_day.get_group(str(date)),count)
+        solo_places,clustered_places=top_trending(trending_each_day.get_group(str(date.date())),count)
         export_to_csv(solo_places,clustered_places,trending_each_day,stdout)
 
-if __name__=='main':
+if __name__=='__main__':
     parser = argparse.ArgumentParser(description='Determine and graph top 10 trending places')
-    parser.add_argument('--date',default=(dt.datetime.now()-dt.timedelta(days=3)), help='The date to calculate trending places (min 3 days ago)')
+    parser.add_argument('--date',default=None, help='The date to calculate trending places (min 3 days ago)')
     parser.add_argument('--period', type=int, default=7, help='Period of days to analyse trends (min 7)')
     parser.add_argument('--count', type=int,default=10, help='Give the trending country')
     parser.add_argument('--graph', action='store_true',default=False, help='Create the graphs of top n Trending places')
