@@ -109,7 +109,7 @@ def top_trending(data, limit):
         head+=req
     return (places, clusters)
 
-
+#TODO: try except clean the code
 def statistics(df, period):
     df['Tscore']=df.groupby(['lat','lon','countries'])['count'].apply(lambda x: (x-pd.rolling_mean(x,period,period))*np.sqrt(period)/pd.rolling_std(x,period,period))
     df.set_index(['lat','lon','countries'],inplace=True)
@@ -131,7 +131,7 @@ def expand_date_range(df, idx):
     df.reset_index('date',inplace=True)
     return df
 
-
+#cleaning data-maximum time consumption
 def resample_missing_values(df, date, period):
     df.set_index('date',inplace=True)
     #For duplicate values for same coordinates, the maximum value is chosen rather than average.
@@ -145,8 +145,9 @@ def resample_missing_values(df, date, period):
     for index,group in df.groupby(['lat','lon','countries']):
         group=expand_date_range(group,idx)
         new_df=pd.concat([new_df,group])
+    del new_df['date']
+    new_df.rename(columns={'index':'date'},inplace=True)
     return new_df
-#drop_dupliates could fasten the resampling function?
 
 
 def analyze_data(stdin, stdout, date, period, count, graph):
@@ -171,7 +172,7 @@ def analyze_data(stdin, stdout, date, period, count, graph):
         plot_graphs(tile_data,trending_each_day,date,date,count)
     else:
         solo_places,clustered_places=top_trending(trending_each_day.get_group(str(date.date())),count)
-        export_to_csv(solo_places,clustered_places,trending_each_day,stdout)
+        export_to_csv(solo_places,clustered_places,high_outliers,stdout)
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description='Determine and graph top 10 trending places')
