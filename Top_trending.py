@@ -140,7 +140,7 @@ def resample_missing_values(df, date, period):
     df.groupby(level=['lat','lon','countries']).fillna(method='ffill',inplace=True)
     df.groupby(level=['lat','lon','countries']).fillna(method='bfill',inplace=True)
     df.reset_index(inplace=True)
-    idx = pd.DatetimeIndex(start=date-dt.timedelta(days=period), end=date, freq='D')
+    idx = pd.DatetimeIndex(start=date-dt.timedelta(days=(period-1)), end=date, freq='D')
     new_df=pd.DataFrame(columns=['x','y','date','count','z','lat','lon'])
     for index,group in df.groupby(['lat','lon','countries']):
         group=expand_date_range(group,idx)
