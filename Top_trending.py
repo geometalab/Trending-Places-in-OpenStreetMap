@@ -113,10 +113,11 @@ def top_trending(data, limit):
 def statistics(df, period):
     df['Tscore']=df.groupby(['lat','lon','countries'])['count'].apply(lambda x: (x-pd.rolling_mean(x,period,period))*np.sqrt(period)/pd.rolling_std(x,period,period))
     df.set_index(['lat','lon','countries'],inplace=True)
+    #Temporary solution for the problem in Pandas.
     for index,group in df.groupby(level=[0,1,2]):
         try:
             df.loc[index,'rolling_median']=pd.rolling_median(group['count'],period,period)
-        except:
+        except MemoryError:
             df.loc[index,'rolling_median']=pd.rolling_median(group['count'],period,period)
     df['abs_med']=df['count']-df['rolling_median']
     return df
@@ -154,6 +155,7 @@ def analyze_data(stdin, stdout, date, period, count, graph):
     if not date:
         date=MAX_DATE
     else:
+        #check for string
         date=dt.datetime.strptime(date,"%Y-%m-%d")
         date=MAX_DATE if date>MAX_DATE else date
     period=MIN_PERIOD if period<MIN_PERIOD else period
