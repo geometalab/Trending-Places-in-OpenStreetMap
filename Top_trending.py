@@ -149,7 +149,11 @@ def resample_missing_values(df, date, period):
     return new_df
 
 
-def analyze_data(stdin, stdout, date, period, count, graph):
+def get_country(df,iso):
+    return df[df['countries' == iso]]
+
+
+def analyze_data(stdin, stdout, date, period, count, graph, country):
     if not date:
         date = MAX_DATE
     else:
@@ -160,6 +164,8 @@ def analyze_data(stdin, stdout, date, period, count, graph):
     tile_data = pd.read_csv(stdin, sep=',', parse_dates=['data'], keep_default_na=False)
     tile_data.rename(columns={'data': 'date'}, inplace=True)
     tile_data.drop_duplicates(inplace=True)
+    if country:
+        tile_data=get_country(tile_data,country)
     tile_data = resample_missing_values(tile_data, date, period)
     tile_data = statistics(tile_data, period)
     high_outliers = tile_data[tile_data['t_score'] >= 1.943]
@@ -174,12 +180,13 @@ def analyze_data(stdin, stdout, date, period, count, graph):
         solo_places, clustered_places = top_trending(trending_each_day.get_group(str(date.date())), count)
         export_to_csv(solo_places, clustered_places, high_outliers,stdout)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Determine and graph top 10 trending places')
     parser.add_argument('--date',default=None, help='The date to calculate trending places (min 3 days ago)')
     parser.add_argument('--period', type=int, default=7, help='Period of days to analyse trends (min 7)')
     parser.add_argument('--count', type=int,default=10, help='Give the trending country')
     parser.add_argument('--graph', action='store_true',default=False, help='Create the graphs of top n Trending places')
+    parser.add_argument('--country', default=None, help='ISO code for country to find trending places within')
 
     stdin = sys.stdin if sys.version_info.major == 2 else sys.stdin.buffer
     stdout = sys.stdout if sys.version_info.major == 2 else sys.stdout.buffer
