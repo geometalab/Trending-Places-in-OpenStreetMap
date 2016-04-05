@@ -109,7 +109,7 @@ def top_trending(data, limit):
         head+=req
     return (places, clusters)
 
-#TODO: try except clean the code
+
 def statistics(df, period):
     df['Tscore']=df.groupby(['lat','lon','countries'])['count'].apply(lambda x: (x-x.rolling(period,period).mean())*np.sqrt(period)/x.rolling(period,period).std())
     df['rolling_median']=df.groupby(['lat','lon','countries'])['count'].apply(lambda x: x.rolling(period,period).median())
