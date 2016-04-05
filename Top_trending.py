@@ -111,14 +111,8 @@ def top_trending(data, limit):
 
 #TODO: try except clean the code
 def statistics(df, period):
-    df['Tscore']=df.groupby(['lat','lon','countries'])['count'].apply(lambda x: (x-pd.rolling_mean(x,period,period))*np.sqrt(period)/pd.rolling_std(x,period,period))
-    df.set_index(['lat','lon','countries'],inplace=True)
-    #Temporary solution for the problem in Pandas.
-    for index,group in df.groupby(level=[0,1,2]):
-        try:
-            df.loc[index,'rolling_median']=pd.rolling_median(group['count'],period,period)
-        except MemoryError:
-            df.loc[index,'rolling_median']=pd.rolling_median(group['count'],period,period)
+    df['Tscore']=df.groupby(['lat','lon','countries'])['count'].apply(lambda x: (x-x.rolling(period,period).mean())*np.sqrt(period)/x.rolling(period,period).std())
+    df['rolling_median']=df.groupby(['lat','lon','countries'])['count'].apply(lambda x: x.rolling(period,period).median())
     df['abs_med']=df['count']-df['rolling_median']
     return df
 
@@ -136,7 +130,8 @@ def expand_date_range(df, idx):
 def resample_missing_values(df, date, period):
     df.set_index('date',inplace=True)
     #For duplicate values for same coordinates, the maximum value is chosen rather than average.
-    df=(df.groupby(['lat','lon','countries'])).resample('D',how='max')
+    df=(df.groupby(['lat','lon','countries'])).resample('D').max()
+    df.reset_index(['lat','lon','countries'],drop=True,inplace=True)
     df['count'].fillna(0,inplace=True)
     df.groupby(level=['lat','lon','countries']).fillna(method='ffill',inplace=True)
     df.groupby(level=['lat','lon','countries']).fillna(method='bfill',inplace=True)
