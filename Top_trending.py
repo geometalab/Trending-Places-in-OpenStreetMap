@@ -25,7 +25,7 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, folder_out=None):
     for day in days:
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        data = trending_daily.get_group(str(day))
+        data = trending_daily.get_group(str(day.date()))
         places, clusters = top_trending(data, limit)
         for cluster in clusters:
             places.add(max_from_cluster(cluster, data))
@@ -140,11 +140,10 @@ def resample_missing_values(df, date, period):
     df.groupby(['lat', 'lon', 'countries']).fillna(method='bfill', inplace=True)
     df.reset_index(inplace=True)
     idx = pd.DatetimeIndex(start=date-dt.timedelta(days=(period-1)), end=date, freq='D')
-    new_df = pd.DataFrame(columns=['x', 'y', 'date', 'count', 'z', 'lat', 'lon'])
+    new_df = pd.DataFrame()
     for index,group in df.groupby(['lat', 'lon', 'countries']):
         group = expand_date_range(group, idx)
         new_df = pd.concat([new_df, group])
-    del new_df['date']
     new_df.rename(columns={'index': 'date'}, inplace=True)
     return new_df
 
@@ -157,7 +156,6 @@ def analyze_data(stdin, stdout, date, period, count, graph, country):
     if not date:
         date = MAX_DATE
     else:
-        # check for string
         date = dt.datetime.strptime(date,"%Y-%m-%d")
         date = MAX_DATE if date > MAX_DATE else date
     period = MIN_PERIOD if period < MIN_PERIOD else period
@@ -168,6 +166,7 @@ def analyze_data(stdin, stdout, date, period, count, graph, country):
         tile_data=get_country(tile_data,country)
     tile_data = resample_missing_values(tile_data, date, period)
     tile_data = statistics(tile_data, period)
+    tile_data.set_index(['lat','lon','countries'],inplace=True)
     high_outliers = tile_data[tile_data['t_score'] >= 1.943]
     high_outliers.reset_index(inplace=True)
     high_outliers['values'] = high_outliers.groupby('date')['abs_med'].apply(lambda x: (x-x.median())/x.median())
