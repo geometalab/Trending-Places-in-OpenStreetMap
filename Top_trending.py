@@ -8,7 +8,7 @@ import datetime as dt
 import itertools as it
 import os
 
-MAX_DATE = dt.datetime.now()-dt.timedelta(days=3)
+MAX_DATE = dt.datetime.now()-dt.timedelta(days=2)
 MIN_PERIOD = 7
 THRESHOLD = 0.5
 
