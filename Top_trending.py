@@ -9,7 +9,7 @@ import datetime as dt
 import itertools as it
 import os
 
-MAX_DATE = dt.datetime.now()-dt.timedelta(days=2)
+MAX_DATE = (dt.datetime.now()-dt.timedelta(days=2)).replace(hour=0,minute=0,second=0,microsecond=0)
 MIN_PERIOD = 7
 THRESHOLD = 0.5
 RESAMPLE = 'resampled'
