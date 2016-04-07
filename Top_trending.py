@@ -3,6 +3,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_pdf import PdfPages
+from Caches import Cache
 import matplotlib.pylab as plt
 import datetime as dt
 import itertools as it
@@ -11,6 +12,9 @@ import os
 MAX_DATE = dt.datetime.now()-dt.timedelta(days=2)
 MIN_PERIOD = 7
 THRESHOLD = 0.5
+RESAMPLE = 'resampled'
+cache = Cache()
+
 
 
 def plot_graphs(df, trending_daily, day_from, day_to, limit, folder_out=None):
@@ -159,12 +163,19 @@ def analyze_data(stdin, stdout, date, period, count, graph, country):
         date = dt.datetime.strptime(date,"%Y-%m-%d")
         date = MAX_DATE if date > MAX_DATE else date
     period = MIN_PERIOD if period < MIN_PERIOD else period
-    tile_data = pd.read_csv(stdin, sep=',', parse_dates=['data'], keep_default_na=False)
-    tile_data.rename(columns={'data': 'date'}, inplace=True)
-    tile_data.drop_duplicates(inplace=True)
-    if country:
-        tile_data=get_country(tile_data,country)
-    tile_data = resample_missing_values(tile_data, date, period)
+    if not cache.existing(RESAMPLE+str(date.date())):
+        tile_data = pd.read_csv(stdin, sep=',', parse_dates=['data'], keep_default_na=False)
+        tile_data.rename(columns={'data': 'date'}, inplace=True)
+        tile_data.drop_duplicates(inplace=True)
+        if country:
+            tile_data = get_country(tile_data, country)
+        tile_data = resample_missing_values(tile_data, date, period)
+        if not country:
+            cache.dumping(tile_data, RESAMPLE+str(date.date()))
+    else:
+        tile_data = cache.extracting(RESAMPLE+str(date.date()))
+        if country:
+            tile_data = get_country(tile_data, country)
     tile_data = statistics(tile_data, period)
     tile_data.set_index(['lat','lon','countries'],inplace=True)
     high_outliers = tile_data[tile_data['t_score'] >= 1.943]
@@ -191,8 +202,6 @@ if __name__ == '__main__':
     stdout = sys.stdout if sys.version_info.major == 2 else sys.stdout.buffer
 
     analyze_data(stdin,stdout,**parser.parse_args().__dict__)
-
-
 
 
 
