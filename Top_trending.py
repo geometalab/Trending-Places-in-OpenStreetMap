@@ -153,7 +153,7 @@ def resample_missing_values(df, date, period):
 
 
 def get_country(df,iso):
-    return df[df['countries' == iso]]
+    return df[df['countries'] == iso]
 
 
 def analyze_data(stdin, stdout, date, period, count, graph, country):
