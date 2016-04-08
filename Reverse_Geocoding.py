@@ -29,6 +29,8 @@ class ReverseGeoCode:
         response = urllib.request.urlopen(fetch)
         self.data = json.loads(response.read().decode('utf-8'))
         response.close()
+        if 'error' in self.data.keys():
+            raise Exception ('Wrong query, please check again')
 
     def _get_city(self):
         """
@@ -41,7 +43,21 @@ class ReverseGeoCode:
         try:
             return self.data['address']['city']
         except KeyError:
-            return self.data['display_name']
+            return "%.2f,%.2f" % (self.data['lat'], self.data['lon'])
+
+    def _get_country_code(self):
+        """
+        Returns country attribute if it exists, otherwise ''
+
+        Returns
+        -------
+
+        """
+        try:
+            return self.data['address']['country_code'].upper()
+        except KeyError:
+            return ''
+
 
     def get_cities_from_file(self, date,
                                    folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Tile_log')):
@@ -62,8 +78,10 @@ class ReverseGeoCode:
             cities = set()
             for lat, lon in zip(df['lat'], df['lon']):
                 self._fetch(lat, lon)
-                cities.add(self._get_city())
+                cities.add(self._get_city()+'('+self._get_country_code()+')')
             return cities
         except OSError:
             return False
 
+rec=ReverseGeoCode()
+print (rec.get_cities_from_file('2016-04-05'))
