@@ -95,7 +95,7 @@ class ReverseGeoCode:
             df = pd.read_csv(os.path.join(folder, date+'.csv'), sep=';')
             cities = set()
             for lat, lon in zip(df['lat'], df['lon']):
-                self._fetch(lat, lon)
+                self._fetch(lat, lon, 10)
                 cities.add(self._get_city()+'('+self._get_country_code()+')')
             return cities
         except OSError:
@@ -113,3 +113,8 @@ class ReverseGeoCode:
                continue
         return Result_dict
 
+rec=ReverseGeoCode()
+#rec._fetch_from_id(3815077900,'N')
+#print (rec.data)
+print (rec.get_address_attributes(51.289801107253936, -114.08203125,10,'country','country_code','state'))
+#print (rec.get_cities_from_file('2016-04-05'))
