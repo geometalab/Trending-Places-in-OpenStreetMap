@@ -2,7 +2,6 @@ import sys
 import argparse
 import numpy as np
 import pandas as pd
-from matplotlib.backends.backend_pdf import PdfPages
 from Caches import Cache
 import matplotlib.pylab as plt
 import datetime as dt
@@ -16,7 +15,6 @@ RESAMPLE = 'resampled'
 cache = Cache()
 
 
-
 def plot_graphs(df, trending_daily, day_from, day_to, limit, folder_out=None):
     days = pd.DatetimeIndex(start=day_from, end=day_to, freq='D')
     if not folder_out:
@@ -25,27 +23,29 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, folder_out=None):
         folder_out = os.path.join(folder_out, 'Tile_log')
     if not os.path.exists(folder_out):
         os.makedirs(folder_out)
-    pp = PdfPages(os.path.join(folder_out, 'Trending_Graphs.pdf'))
     for day in days:
         fig = plt.figure()
         ax = fig.add_subplot(111)
+        plt.rc('lines', linewidth=2)
         data = trending_daily.get_group(str(day.date()))
         places, clusters = top_trending(data, limit)
         for cluster in clusters:
             places.add(max_from_cluster(cluster, data))
+        ax.set_color_cycle([plt.cm.Accent(i) for i in np.linspace(0, 1, limit)])
         for item in places:
             lat, lon, country = item
-            mark = "%f %f " % (lat, lon)
-            mark = mark+country
+            mark = "%f %f(%s)" % (lat, lon, country)
             gp = df.loc[item].plot(ax=ax, x='date', y='count', label=mark)
-        ax.axvline(x=day.date(), linestyle='dashed', color='red')
-        gp.legend(loc='best', fontsize='xx-small')
-        gp.set_title(day,{'fontsize': 'xx-small', 'verticalalignment': 'bottom'})
-        plt.savefig(pp, format='pdf')
+        ax.tick_params(axis='both', which='major', labelsize=10)
+        plt.xlabel('Date', fontsize='small', verticalalignment='baseline', horizontalalignment='right')
+        plt.ylabel('Total number of views', fontsize='small',verticalalignment='center', horizontalalignment='center', labelpad=6)
+        gp.legend(loc='best', fontsize='xx-small', ncol=2)
+        gp.set_title('Top 10 OSM trending places on '+str(day.date()),{'fontsize': 'large', 'verticalalignment': 'bottom'})
+        plt.tight_layout()
+        plt.savefig(os.path.join(folder_out, 'Trending_Graphs'+str(day.date())+'.png'))
         xpath = os.path.join(folder_out, str(day.date())+'.csv')
         export_to_csv(places, clusters, data, xpath)
         plt.close()
-    pp.close()
 
 
 def max_from_cluster(cluster, data):
