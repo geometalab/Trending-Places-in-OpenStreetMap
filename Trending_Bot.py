@@ -1,10 +1,16 @@
 # Framework credits: twitterbot by thricedotted
 
 import tweepy
-from keys import keys
+from Reverse_Geocoding import FormatOSMTrendingNames as Ft
+import datetime as dt
 import logging
 import time
 import os
+
+TWITTER_STATUS_LIMIT = 116  # with image
+MINUTES_INTERVAL_TWEET = 24*60  # once everyday
+DELAY_MIN = 30  # If trending places output doesnt exist, check after 30 mins
+DATE = (dt.datetime.now()-dt.timedelta(days=2)).replace(hour=0, minute=0, second=0, microsecond=0)
 
 class TrendingTweepy:
 
@@ -32,8 +38,6 @@ class TrendingTweepy:
         self.state['Trending items'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Tile_log')
         self._follow_all()
 
-        self.count = 0
-
         logging.basicConfig(format='%(asctime)s | %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
                             filename=self.screen_name + '.log',
                             level=logging.DEBUG)
@@ -55,23 +59,49 @@ class TrendingTweepy:
         """
         Tweets the top trending places
         """
+        logging.info("Updating status with Trending places....")
+
         try:
-            self.api.update_status('test'+str(self.count))
-            self.count+=1
-            self.state['last_tweet']=time.time()
+            base_text = "Yesterday's top trending places in #OSM:"
+            end_text = "Explain why!"
+            count_available = TWITTER_STATUS_LIMIT-len(base_text)-len(end_text)
+            text = Ft().get_cities_from_file(str(DATE.date()), count_available)
+            img = Ft.get_trending_graph(str(DATE.date()))
+            if text:
+                self.api.update_with_media(img, base_text+text+end_text)
+                self.state['last_tweet'] = time.time()
+            else:
+                # Check after 30 mins
+                logging.info("Could not update status. Rechecking in a while....")
+                self.state['last_tweet'] = time.time()+(DELAY_MIN-MINUTES_INTERVAL_TWEET)*60
+
         except tweepy.TweepError as e:
             self._log_tweepy_error('Can\'t update status because', e)
 
-    def on_message(self): pass
+    def on_message(self):
+        """
+        On receiving a direct message from a follower add to subscribed country list
+        Returns
+        -------
 
-    def update_subscribers(self): pass
+        """
+        pass
+
+    def update_subscribers(self):
+        """
+        Find the top 10 trending OSM places for the subscribed countries and notify subscribers
+        Returns
+        -------
+
+        """
+        pass
 
     def _config_bot(self,file):
         with open(file,'r') as conf_file:
             for line in conf_file:
                 try:
-                    configuration,value=line.split('=')
-                    self.config[configuration.strip()]=value.strip()
+                    configuration, value = line.split('=')
+                    self.config[configuration.strip()] = value.strip()
                 except ValueError as e:
                     self._log_tweepy_error('Wrong configuration parameters', e)
 
@@ -105,7 +135,6 @@ class TrendingTweepy:
         except tweepy.TweepError as e:
             self._log_tweepy_error('Can\'t follow back existing followers', e)
 
-
     def _check_followers(self):
         """
         Checks followers.
@@ -119,7 +148,6 @@ class TrendingTweepy:
         except tweepy.TweepError as e:
             self._log_tweepy_error('Can\'t update followers', e)
 
-
     def _handle_followers(self):
         """
         Handles new followers.
@@ -132,18 +160,19 @@ class TrendingTweepy:
         Runs the main tweepy smallbot
         """
         while True:
-            # check followers every 1 minute
-            if (time.time() - self.state['last_follow_check']) > 30:
-                self._check_followers()
-                self._handle_followers()
+            # check followers every 5 minutes
+            #if (time.time() - self.state['last_follow_check']) > 5*60:
+            #    self._check_followers()
+            #    self._handle_followers()
 
             # Tweet once every 24hours
-            if (time.time() - self.state['last_tweet']) > 24*60:
+            if (time.time() - self.state['last_tweet']) > MINUTES_INTERVAL_TWEET*60:
                 self.tweet_status_trends()
 
 
 if __name__ == '__main__':
     smallbot = TrendingTweepy()
     smallbot.run()
+
 
 
