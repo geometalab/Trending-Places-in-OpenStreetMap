@@ -61,11 +61,14 @@ def max_from_cluster(cluster, data):
 
 def export_to_csv(places, clusters, data, stdout):
     for cluster in clusters:
-        places.update(cluster)
+        places.add(max_from_cluster(cluster, data))
     frame = pd.DataFrame()
     property = data.groupby(level=[0, 1, 2])
     for item in places:
         frame = pd.concat([frame, property.get_group(item)])
+    frame.rename(columns={'date': 'last_day', 'z': 'zoom', 'x': 'tms_x', 'y': 'tms_y',
+                          'count': 'view_last_day'}, inplace=True)
+    frame.index.names=['lat', 'lon', 'country_code']
     frame.to_csv(stdout, sep=';')
 
 
@@ -181,9 +184,9 @@ def analyze_data(stdin, stdout, date, period, count, graph, country):
     tile_data.set_index(['lat','lon','countries'],inplace=True)
     high_outliers = tile_data[tile_data['t_score'] >= 1.943]
     high_outliers.reset_index(inplace=True)
-    high_outliers['values'] = high_outliers.groupby('date')['abs_med'].apply(lambda x: (x-x.median())/x.median())
+    high_outliers['trending_rank'] = high_outliers.groupby('date')['abs_med'].apply(lambda x: (x-x.median())/x.median())
     high_outliers.set_index(['lat', 'lon', 'countries'], inplace=True)
-    high_outliers.sort_values(['date', 'values'], ascending=False, inplace=True)
+    high_outliers.sort_values(['date', 'trending_rank'], ascending=False, inplace=True)
     trending_each_day = high_outliers.groupby('date')
     if graph:
         plot_graphs(tile_data, trending_each_day, date, date, count)
