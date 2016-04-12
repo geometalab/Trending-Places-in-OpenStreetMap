@@ -31,7 +31,7 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, folder_out=None):
         places, clusters = top_trending(data, limit)
         for cluster in clusters:
             places.add(max_from_cluster(cluster, data))
-        ax.set_color_cycle([plt.cm.Accent(i) for i in np.linspace(0, 1, limit)])
+        ax.set_prop_cycle(plt.cycler('color', [plt.cm.Accent(i) for i in np.linspace(0, 1, limit)]))
         for item in places:
             lat, lon, country = item
             mark = "%f %f(%s)" % (lat, lon, country)
@@ -153,6 +153,7 @@ def resample_missing_values(df, date, period):
 
 
 def get_country(df,iso):
+    # TODO: Update the value of threshold according to country size for better cluster detection
     return df[df['countries'] == iso]
 
 
