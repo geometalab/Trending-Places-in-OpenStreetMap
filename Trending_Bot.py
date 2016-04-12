@@ -12,6 +12,7 @@ MINUTES_INTERVAL_TWEET = 24*60  # once everyday
 DELAY_MIN = 30  # If trending places output doesnt exist, check after 30 mins
 DATE = (dt.datetime.now()-dt.timedelta(days=2)).replace(hour=0, minute=0, second=0, microsecond=0)
 
+
 class TrendingTweepy:
 
     def __init__(self, conf_file='config'):
@@ -62,7 +63,7 @@ class TrendingTweepy:
         logging.info("Updating status with Trending places....")
 
         try:
-            base_text = "Yesterday's top trending places in #OSM:"
+            base_text = str(DATE.date())+"'s top trending places in #OSM:"
             end_text = "Explain why!"
             count_available = TWITTER_STATUS_LIMIT-len(base_text)-len(end_text)
             text = Ft().get_cities_from_file(str(DATE.date()), count_available)
@@ -159,15 +160,16 @@ class TrendingTweepy:
         """
         Runs the main tweepy smallbot
         """
-        while True:
+        #while True:
             # check followers every 5 minutes
             #if (time.time() - self.state['last_follow_check']) > 5*60:
             #    self._check_followers()
             #    self._handle_followers()
 
             # Tweet once every 24hours
-            if (time.time() - self.state['last_tweet']) > MINUTES_INTERVAL_TWEET*60:
-                self.tweet_status_trends()
+            #if (time.time() - self.state['last_tweet']) > MINUTES_INTERVAL_TWEET*60:
+                #self.tweet_status_trends()
+        self.tweet_status_trends()
 
 
 if __name__ == '__main__':
