@@ -14,7 +14,6 @@ class ReverseGeoCode:
         self.fetch = link+self.query
         self.data = None
 
-
     def _fetch(self, osm_id, osm_type):
         """
         Stores JSON from osm_id and osm_type geocoding
@@ -27,7 +26,6 @@ class ReverseGeoCode:
         response.close()
         if 'error' in self.data.keys():
             raise Exception ('Wrong query, please check again')
-
 
     def _fetch(self, lat, lon, zoom):
         """
@@ -60,7 +58,7 @@ class ReverseGeoCode:
         try:
             return self.data['address']['city']
         except KeyError:
-            return "%.2f,%.2f" % (self.data['lat'], self.data['lon'])
+            return "%.2f,%.2f" % (float(self.data['lat']), float(self.data['lon']))
 
     def _get_country_code(self):
         """
@@ -74,7 +72,6 @@ class ReverseGeoCode:
             return self.data['address']['country_code'].upper()
         except KeyError:
             return ''
-
 
     def get_cities_from_file(self, date,
                                    folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Tile_log')):
@@ -93,28 +90,60 @@ class ReverseGeoCode:
         """
         try:
             df = pd.read_csv(os.path.join(folder, date+'.csv'), sep=';')
-            cities = set()
+            cities = list()
             for lat, lon in zip(df['lat'], df['lon']):
                 self._fetch(lat, lon, 10)
-                cities.add(self._get_city()+'('+self._get_country_code()+')')
+                cities.append(self._get_city()+'('+self._get_country_code()+')')
             return cities
         except OSError:
             return False
 
-
     def get_address_attributes(self, lat, lon, zoom, *args):
         self._fetch(lat, lon, zoom)
-        Result_dict={}
+        result_dict = {}
         for tag in args:
             try:
-               print (tag)
-               Result_dict[tag]=self.data['address'][tag]
+                result_dict[tag] = self.data['address'][tag]
             except KeyError:
-               continue
-        return Result_dict
+                continue
+        return result_dict
 
-rec=ReverseGeoCode()
-#rec._fetch_from_id(3815077900,'N')
-#print (rec.data)
-print (rec.get_address_attributes(51.289801107253936, -114.08203125,10,'country','country_code','state'))
-#print (rec.get_cities_from_file('2016-04-05'))
+
+class FormatOSMTrendingNames(ReverseGeoCode):
+
+    def get_cities_from_file(self, date, char_limit,
+                            folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Tile_log')):
+        """
+        Returns formatted city names of the top trending palaces chopped off at the specified character limit,
+        and returns False if the output of the trending places does not exist.
+
+        Parameters
+        ----------
+        date
+        char_limit
+        folder
+
+        Returns
+        -------
+
+        """
+        final_names = super(FormatOSMTrendingNames, self).get_cities_from_file(date)
+        value = ''
+
+        if final_names is False:
+            return False
+
+        for name in final_names:
+            if len(value+name+' ') <= char_limit:
+                value += name+' '
+            else:
+                value += min(3,(char_limit-len(value)))*'.'
+                break
+
+        return value
+
+    @staticmethod
+    def get_trending_graph(date,
+                           folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Tile_log')):
+            img = os.path.join(folder, 'Trending_Graphs'+date+'.png')
+            return img
