@@ -2,27 +2,22 @@ import sys
 import argparse
 import numpy as np
 import pandas as pd
-from Caches import Cache
 import matplotlib.pylab as plt
 import datetime as dt
 import itertools as it
-import os
+from Caches import Cache
+from Database import TrendingDb
 
 MAX_DATE = (dt.datetime.now()-dt.timedelta(days=2)).replace(hour=0,minute=0,second=0,microsecond=0)
 MIN_PERIOD = 7
 THRESHOLD = 0.5
 RESAMPLE = 'resampled'
+WORLD = 'world'
 cache = Cache()
 
 
-def plot_graphs(df, trending_daily, day_from, day_to, limit, folder_out=None):
+def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folder_out=None):
     days = pd.DatetimeIndex(start=day_from, end=day_to, freq='D')
-    if not folder_out:
-        folder_out = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Tile_log')
-    else:
-        folder_out = os.path.join(folder_out, 'Tile_log')
-    if not os.path.exists(folder_out):
-        os.makedirs(folder_out)
     for day in days:
         fig = plt.figure()
         ax = fig.add_subplot(111)
@@ -42,9 +37,9 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, folder_out=None):
         gp.legend(loc='best', fontsize='xx-small', ncol=2)
         gp.set_title('Top 10 OSM trending places on '+str(day.date()),{'fontsize': 'large', 'verticalalignment': 'bottom'})
         plt.tight_layout()
-        plt.savefig(os.path.join(folder_out, 'Trending_Graphs'+str(day.date())+'.png'))
-        xpath = os.path.join(folder_out, str(day.date())+'.csv')
-        export_to_csv(places, clusters, data, xpath)
+        db = TrendingDb()
+        db.update_table_img(plt, str(day.date()), region=country_code)
+        export(places, clusters, data)
         plt.close()
 
 
@@ -59,7 +54,7 @@ def max_from_cluster(cluster, data):
     return cluster_max
 
 
-def export_to_csv(places, clusters, data, stdout):
+def export(places, clusters, data):
     for cluster in clusters:
         places.add(max_from_cluster(cluster, data))
     frame = pd.DataFrame()
@@ -69,7 +64,9 @@ def export_to_csv(places, clusters, data, stdout):
     frame.rename(columns={'date': 'last_day', 'z': 'zoom', 'x': 'tms_x', 'y': 'tms_y',
                           'count': 'view_last_day'}, inplace=True)
     frame.index.names=['lat', 'lon', 'country_code']
-    frame.to_csv(stdout, sep=';')
+    frame['last_day'] = frame['last_day'].dt.date
+    db = TrendingDb()
+    db.update_table(frame)
 
 
 def identify_cluster(trending_places):
@@ -160,7 +157,7 @@ def get_country(df,iso):
     return df[df['countries'] == iso]
 
 
-def analyze_data(stdin, stdout, date, period, count, graph, country):
+def analyze_data(stdin, date, period, count, graph, country):
     if not date:
         date = MAX_DATE
     else:
@@ -185,14 +182,18 @@ def analyze_data(stdin, stdout, date, period, count, graph, country):
     high_outliers = tile_data[tile_data['t_score'] >= 1.943]
     high_outliers.reset_index(inplace=True)
     high_outliers['trending_rank'] = high_outliers.groupby('date')['abs_med'].apply(lambda x: (x-x.median())/x.median())
+    if not country:
+        high_outliers['world_or_region'] = WORLD
+    else:
+        high_outliers['world_or_region'] = country
     high_outliers.set_index(['lat', 'lon', 'countries'], inplace=True)
     high_outliers.sort_values(['date', 'trending_rank'], ascending=False, inplace=True)
     trending_each_day = high_outliers.groupby('date')
     if graph:
-        plot_graphs(tile_data, trending_each_day, date, date, count)
+        plot_graphs(tile_data, trending_each_day, date, date, count, country or WORLD)
     else:
         solo_places, clustered_places = top_trending(trending_each_day.get_group(str(date.date())), count)
-        export_to_csv(solo_places, clustered_places, high_outliers,stdout)
+        export(solo_places, clustered_places, high_outliers)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Determine and graph top 10 trending places')
@@ -205,7 +206,7 @@ if __name__ == '__main__':
     stdin = sys.stdin if sys.version_info.major == 2 else sys.stdin.buffer
     stdout = sys.stdout if sys.version_info.major == 2 else sys.stdout.buffer
 
-    analyze_data(stdin,stdout,**parser.parse_args().__dict__)
+    analyze_data(stdin,**parser.parse_args().__dict__)
 
 
 
