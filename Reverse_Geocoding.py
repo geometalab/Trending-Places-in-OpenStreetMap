@@ -2,6 +2,7 @@ import urllib.request
 import json
 import os
 import pandas as pd
+from Database import TrendingDb
 
 
 class ReverseGeoCode:
@@ -73,8 +74,7 @@ class ReverseGeoCode:
         except KeyError:
             return ''
 
-    def get_cities_from_file(self, date,
-                                   folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Tile_log')):
+    def get_cities_from_file(self, date, region, db=TrendingDb()):
         """
         Fetches a list of cities in the top trending places.
         The csv file must have a lat and lon column in order to reverse geocode
@@ -89,7 +89,8 @@ class ReverseGeoCode:
 
         """
         try:
-            df = pd.read_csv(os.path.join(folder, date+'.csv'), sep=';')
+            df = db.retrieve_data(date,world_or_region=region)
+            df.sort_values(['trending_rank'], ascending=False, inplace=True)
             cities = list()
             for lat, lon in zip(df['lat'], df['lon']):
                 self._fetch(lat, lon, 10)
@@ -97,6 +98,31 @@ class ReverseGeoCode:
             return cities
         except OSError:
             return False
+
+    # def get_cities_from_file(self, date,
+    #                                folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Tile_log')):
+    #     """
+    #     Fetches a list of cities in the top trending places.
+    #     The csv file must have a lat and lon column in order to reverse geocode
+    #
+    #     Parameters
+    #     ----------
+    #     date
+    #     folder
+    #
+    #     Returns
+    #     -------
+    #
+    #     """
+    #     try:
+    #         df = pd.read_csv(os.path.join(folder, date+'.csv'), sep=';')
+    #         cities = list()
+    #         for lat, lon in zip(df['lat'], df['lon']):
+    #             self._fetch(lat, lon, 10)
+    #             cities.append(self._get_city()+'('+self._get_country_code()+')')
+    #         return cities
+    #     except OSError:
+    #         return False
 
     def get_address_attributes(self, lat, lon, zoom, *args):
         self._fetch(lat, lon, zoom)
@@ -111,8 +137,7 @@ class ReverseGeoCode:
 
 class FormatOSMTrendingNames(ReverseGeoCode):
 
-    def get_cities_from_file(self, date, char_limit,
-                            folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Tile_log')):
+    def get_cities_from_file(self, date, region, char_limit,db=TrendingDb()):
         """
         Returns formatted city names of the top trending palaces chopped off at the specified character limit,
         and returns False if the output of the trending places does not exist.
@@ -127,7 +152,7 @@ class FormatOSMTrendingNames(ReverseGeoCode):
         -------
 
         """
-        final_names = super(FormatOSMTrendingNames, self).get_cities_from_file(date)
+        final_names = super(FormatOSMTrendingNames, self).get_cities_from_file(date, region)
         value = ''
 
         if final_names is False:
@@ -143,7 +168,10 @@ class FormatOSMTrendingNames(ReverseGeoCode):
         return value
 
     @staticmethod
-    def get_trending_graph(date,
-                           folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Tile_log')):
-            img = os.path.join(folder, 'Trending_Graphs'+date+'.png')
-            return img
+    def get_trending_graph(date,region,
+                           folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Tile_log'), db=TrendingDb()):
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        img = os.path.join(folder, 'Trending_Graphs.png')
+        db.retrieve_data_img(date,img,region=region)
+        return img
