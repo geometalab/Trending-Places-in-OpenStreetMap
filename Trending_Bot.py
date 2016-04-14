@@ -11,6 +11,7 @@ TWITTER_STATUS_LIMIT = 116  # with image
 MINUTES_INTERVAL_TWEET = 24*60  # once everyday
 DELAY_MIN = 30  # If trending places output doesnt exist, check after 30 mins
 DATE = (dt.datetime.now()-dt.timedelta(days=2)).replace(hour=0, minute=0, second=0, microsecond=0)
+REGION = 'world'  #Hard coded for now
 
 
 class TrendingTweepy:
@@ -63,11 +64,11 @@ class TrendingTweepy:
         logging.info("Updating status with Trending places....")
 
         try:
-            base_text = str(DATE.date())+"'s top trending places in #OSM:"
+            base_text = "Top trending places in #OSM "+DATE.strftime('%d/%m')+':'
             end_text = "Explain why!"
             count_available = TWITTER_STATUS_LIMIT-len(base_text)-len(end_text)
-            text = Ft().get_cities_from_file(str(DATE.date()), count_available)
-            img = Ft.get_trending_graph(str(DATE.date()))
+            text = Ft().get_cities_from_file(str(DATE.date()),REGION,count_available)
+            img = Ft.get_trending_graph(str(DATE.date()),REGION)
             if text:
                 self.api.update_with_media(img, base_text+text+end_text)
                 self.state['last_tweet'] = time.time()
