@@ -181,7 +181,6 @@ class TrendingDb:
         if data:
              return self._write_img(data[0], file_out)
         else:
-            print ('No data')
             return False
 
     def retrieve_data(self, date, world_or_region=WORLD, table_name='trending_places'):
