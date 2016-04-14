@@ -59,7 +59,8 @@ class ReverseGeoCode:
         try:
             return self.data['address']['city']
         except KeyError:
-            return "%.2f,%.2f" % (float(self.data['lat']), float(self.data['lon']))
+            return self.data['display_name']
+            #return "%.2f,%.2f" % (float(self.data['lat']), float(self.data['lon']))
 
     def _get_country_code(self):
         """
@@ -88,16 +89,17 @@ class ReverseGeoCode:
         -------
 
         """
-        try:
-            df = db.retrieve_data(date,world_or_region=region)
-            df.sort_values(['trending_rank'], ascending=False, inplace=True)
-            cities = list()
-            for lat, lon in zip(df['lat'], df['lon']):
-                self._fetch(lat, lon, 10)
-                cities.append(self._get_city()+'('+self._get_country_code()+')')
-            return cities
-        except OSError:
+        df = db.retrieve_data(date,world_or_region=region)
+
+        if df.empty:
             return False
+
+        df.sort_values(['trending_rank'], ascending=False, inplace=True)
+        cities = list()
+        for lat, lon in zip(df['lat'], df['lon']):
+            self._fetch(lat, lon, 10)
+            cities.append(self._get_city()+'('+self._get_country_code()+')')
+        return cities
 
     # def get_cities_from_file(self, date,
     #                                folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Tile_log')):
@@ -158,9 +160,28 @@ class FormatOSMTrendingNames(ReverseGeoCode):
         if final_names is False:
             return False
 
+        min_len = 5
+        max_len = 16
+        ellipsis = '...'
+
         for name in final_names:
-            if len(value+name+' ') <= char_limit:
-                value += name+' '
+            name, country = name.split('(')
+            country = '('+country
+            name = name.strip()
+
+            if name.count(',') > 0:
+                name = name.split(',')[1]
+
+            if len(name) > max_len:
+                name = name[:max_len-3]
+                name.strip()
+                temp = name.split(' ')
+                if len(temp[len(temp)-1]) < min_len:
+                    name = name.replace(temp[len(temp)-1],'').strip()
+                name += ellipsis
+
+            if len(value+name+country+' ') <= char_limit:
+                value += name+country+' '
             else:
                 value += min(3,(char_limit-len(value)))*'.'
                 break
@@ -173,5 +194,4 @@ class FormatOSMTrendingNames(ReverseGeoCode):
         if not os.path.exists(folder):
             os.makedirs(folder)
         img = os.path.join(folder, 'Trending_Graphs.png')
-        db.retrieve_data_img(date,img,region=region)
-        return img
+        return db.retrieve_data_img(date,img,region=region) and img
