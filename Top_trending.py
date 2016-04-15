@@ -7,6 +7,7 @@ import datetime as dt
 import itertools as it
 from Caches import Cache
 from Database import TrendingDb
+from Reverse_Geocoding import ReverseGeoCode
 
 MAX_DATE = (dt.datetime.now()-dt.timedelta(days=2)).replace(hour=0,minute=0,second=0,microsecond=0)
 MIN_PERIOD = 7
@@ -14,6 +15,28 @@ THRESHOLD = 0.5
 RESAMPLE = 'resampled'
 WORLD = 'world'
 cache = Cache()
+
+def check_eng(name):
+    if 97 <= ord(name.strip().lower()[0]) <= 122:
+        return True
+    else:
+        return False
+
+
+
+def manipulate_display_name(name):
+    max_len = 20
+    name = name.strip()
+    list = name.split(',')
+    i = 0
+    while i < len(list) and not check_eng(list[i]):
+        i += 1
+    if i == len(list):
+        i -= 1
+    if len(list[i].strip()) > max_len:
+        return list[i][:max_len-3].strip()+'...'
+    else:
+        return list[i]
 
 
 def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folder_out=None):
@@ -29,7 +52,11 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folde
         ax.set_prop_cycle(plt.cycler('color', [plt.cm.Accent(i) for i in np.linspace(0, 1, limit)]))
         for item in places:
             lat, lon, country = item
-            mark = "%f %f(%s)" % (lat, lon, country)
+            result_items = ReverseGeoCode().get_address_attributes(lat, lon,10, 'city')
+            if 'city' not in result_items.keys():
+                mark = "%s(%s)" % (manipulate_display_name(result_items['display_name']), country)
+            else:
+                mark = "%s(%s)" % (result_items['city'], country)
             gp = df.loc[item].plot(ax=ax, x='date', y='count', label=mark)
         ax.tick_params(axis='both', which='major', labelsize=10)
         plt.xlabel('Date', fontsize='small', verticalalignment='baseline', horizontalalignment='right')
