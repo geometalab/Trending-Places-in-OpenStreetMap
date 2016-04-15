@@ -64,8 +64,8 @@ class TrendingTweepy:
         logging.info("Updating status with Trending places....")
 
         try:
-            base_text = "Top trending places in #OSM "+DATE.strftime('%d/%m')+':'
-            end_text = "Explain why!"
+            base_text = "Top trending places in #OSM "+DATE.strftime('%d/%m')+': '
+            end_text = ''
             count_available = TWITTER_STATUS_LIMIT-len(base_text)-len(end_text)
             text = Ft().get_cities_from_file(str(DATE.date()),REGION,count_available)
             img = Ft.get_trending_graph(str(DATE.date()),REGION)

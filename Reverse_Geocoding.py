@@ -144,6 +144,28 @@ class ReverseGeoCode:
 
 class FormatOSMTrendingNames(ReverseGeoCode):
 
+    @staticmethod
+    def _check_eng(name):
+        if 97 <= ord(name.strip().lower()[0]) <= 122:
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def _manipulate_display_name(name):
+        max_len = 20
+        name = name.strip()
+        list = name.split(',')
+        i = 0
+        while i < len(list) and not FormatOSMTrendingNames._check_eng(list[i]):
+            i += 1
+        if i == len(list):
+            i -= 1
+        if len(list[i].strip()) > max_len:
+            return list[i][:max_len-3].strip()+'...'
+        else:
+            return list[i].strip()
+
     def get_cities_from_file(self, date, region, char_limit,db=TrendingDb()):
         """
         Returns formatted city names of the top trending palaces chopped off at the specified character limit,
@@ -175,7 +197,7 @@ class FormatOSMTrendingNames(ReverseGeoCode):
             name = name.strip()
 
             if name.count(',') > 0:
-                name = name.split(',')[1]
+                name = FormatOSMTrendingNames._manipulate_display_name(name)
 
             if len(name) > max_len:
                 name = name[:max_len-3]
@@ -184,11 +206,21 @@ class FormatOSMTrendingNames(ReverseGeoCode):
                 if len(temp[len(temp)-1]) < min_len:
                     name = name.replace(temp[len(temp)-1],'').strip()
                 name += ellipsis
-
-            if len(value+name+country+' ') <= char_limit:
-                value += name+country+' '
             else:
-                value += min(3,(char_limit-len(value)))*'.'
+                name+=' '
+
+            if len(value+name+country+', ') <= char_limit:
+                value += name+country+', '
+            else:
+                if len(value+name+country) <= char_limit:
+                    value += name+country
+                else:
+                    value = value[:value.rfind(', ')]
+                final_len = len(value+ellipsis)
+                if final_len > char_limit:
+                    value = value[:char_limit-final_len]+ellipsis
+                else:
+                    value += ellipsis
                 break
 
         return value
