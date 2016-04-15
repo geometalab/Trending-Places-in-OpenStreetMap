@@ -15,7 +15,7 @@ class ReverseGeoCode:
         self.fetch = link+self.query
         self.data = None
 
-    def _fetch(self, osm_id, osm_type):
+    def _fetch_osmid(self, osm_id, osm_type):
         """
         Stores JSON from osm_id and osm_type geocoding
         """
@@ -129,6 +129,11 @@ class ReverseGeoCode:
     def get_address_attributes(self, lat, lon, zoom, *args):
         self._fetch(lat, lon, zoom)
         result_dict = {}
+        try:
+            result_dict['display_name'] = self.data['display_name']
+        except KeyError:
+            result_dict['display_name'] = "%.2f,%.2f" % (lat, lon)
+
         for tag in args:
             try:
                 result_dict[tag] = self.data['address'][tag]
