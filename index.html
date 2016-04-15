@@ -42,9 +42,57 @@
 
 <h3>
 <a id="about-project-trending-places-in-openstreetmap" class="anchor" href="#about-project-trending-places-in-openstreetmap" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>About Project "Trending Places in OpenStreetMap"</h3>
+<p>Trending places aka OSM place trends, inspired by Google Trends, is an analysis of the
+ <a href="http://planet.openstreetmap.org/tile_logs/">views on the OSM tiles</a> which could help us determine the trends in views of these places i.e. which places are gaining popularity due a hike in views and try to link them with
+  the latest news around that region.
+</p>
+<h3>What is a Trending Place?</h3>
+<p>Places that have unusually higher views than their normal views, implying that places like tourist hot spots are not trending unless there is an increase in the number of views from the average.
+</p>
+<h3>How significant is a trend?</h3>
+<p>Once the 'trending' places or the places with a significant relative hike in views are determined,
+  they need to be ranked relative to each other as well.
+</p>
+<ul>
+  <li>To get the top 10 trending places world wide, the significance is determined as a parameter of the world population-the more number of people looking at it, the more significant the trend is.</li>
+  <p></p>
+  <p>Say for two places <i>TouristyPlace_A, UnseenVillage_B</i> the relative hike in views from average is 20%. However, 20% of the <i>TouristyPlace_A</i> is about 500 views, while that of an <i>UnseenVillage_B</i> is 20 people. Thus, the trend is TouristyPlace_A will be considered more significant and ranked higher than UnseenVillage_B.</p>
+</ul>
 
-<p>This project...</p>
+<h3>Environment Set Up</h3>
+<p>Set up a python virtual environment and start with <b>pip install -r requirements.txt</b><br>
+  Matplotlib and lxml might need additional dependencies.
+</p>
 
+<h3>Running the code</h3>
+        Step 1 and 2 are based on previous work done by Lucas Martinelli and Pavel Tyslacki on <a href="https://github.com/lukasmartinelli/map-trends">map-trends</a>.
+<ul>
+  <li>STEP 1: Fetch the Tile Logs with <b>python3 fetch2.py --date_from=(date_to-7 days back) --date_to=(today-2) >Trends.csv:</b></li>
+  <ul>
+    <li>Fetches the tile logs for 7 days from http://planet.openstreetmap.org/tile_logs/</li>
+    <li>Extracts them</li>
+    <li>Finds lat/lon based on the tile center and groups it into the respective country to which it belongs</li>
+  </ul>
+  <li>STEP 2: <b> cat Trends.csv|python3 bubble.py --date_precision=1d --min_zoom=10
+ --max_zoom=19 --min_subz=10 --max_subz=10 --no_per_day>Zoom10Tiles.csv </b></li>
+  <ul>
+    <li>- The max/min_zoom specify the output zoom level i.e. all views aggregated here. 10 is selected as it is the optimal level to view cities</li>
+    <li>The min/max_subz specify the input levels to aggregate views. </li>
+    <li>Levels 1-10 are ignore as they are considered insignificant, with almost 100% views everyday.</li>
+  </ul>
+  <li>STEP 3: <b> cat Zoom10Tiles.csv | python Top_trending.py --graph</b></li>
+ <p><b>-Input:</b> --date (Default 2 days ago unless specified)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--limit (default 10 for top 10 trending places)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--period (default 7 for the sampling interval)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--country(to specify a country to deduce the trending places in)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--graph(to generate a .png file showing the trending places views)</p>
+
+ <p><b>-The output:</b> trending_places.png (Optional)<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   trending_places.csv (containing the lat/lon/count etc)</p>
+    <li>STEP 4: <b> python Trending_Bot.py</b></li>
+  Before running this twitter bot, you will need to set up your twitter developer account and add in the consumer and token access keys in the config file! A sample format is available on github.
+</ul>
 <h3>
 <a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authors and Contributors</h3>
 
