@@ -36,7 +36,7 @@ def manipulate_display_name(name):
     if len(list[i].strip()) > max_len:
         return list[i][:max_len-3].strip()+'...'
     else:
-        return list[i]
+        return list[i].strip()
 
 
 def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folder_out=None):
