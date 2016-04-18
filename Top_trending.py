@@ -16,12 +16,12 @@ RESAMPLE = 'resampled'
 WORLD = 'world'
 cache = Cache()
 
+
 def check_eng(name):
     if 97 <= ord(name.strip().lower()[0]) <= 122:
         return True
     else:
         return False
-
 
 
 def manipulate_display_name(name):
@@ -56,7 +56,10 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folde
             if 'city' not in result_items.keys():
                 mark = "%s(%s)" % (manipulate_display_name(result_items['display_name']), country)
             else:
-                mark = "%s(%s)" % (result_items['city'], country)
+                if check_eng(result_items['city']):
+                    mark = "%s(%s)" % (result_items['city'], country)
+                else:
+                    mark = "%s(%s)" % (manipulate_display_name(result_items['display_name']), country)
             gp = df.loc[item].plot(ax=ax, x='date', y='count', label=mark)
         ax.tick_params(axis='both', which='major', labelsize=10)
         plt.xlabel('Date', fontsize='small', verticalalignment='baseline', horizontalalignment='right')
