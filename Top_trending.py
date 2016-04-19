@@ -59,7 +59,7 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folde
                 if check_eng(result_items['city']):
                     mark = "%s(%s)" % (result_items['city'], country)
                 else:
-                    mark = "%s(%s)" % (manipulate_display_name(result_items['display_name']), country)
+                    mark = "%.2f %.2f (%s)" % (lat, lon, country)
             gp = df.loc[item].plot(ax=ax, x='date', y='count', label=mark)
         ax.tick_params(axis='both', which='major', labelsize=10)
         plt.xlabel('Date', fontsize='small', verticalalignment='baseline', horizontalalignment='right')
