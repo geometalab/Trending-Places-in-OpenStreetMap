@@ -1,0 +1,8 @@
+.idea/*
+Cache/*
+Tile_logs/*
+keys.py
+*.db
+test*
+venv/*
+__pycache__/
