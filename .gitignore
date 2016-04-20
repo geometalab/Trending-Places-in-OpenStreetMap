@@ -1,6 +1,6 @@
 .idea/*
 Cache/*
-Tile_logs/*
+Tile_log/*
 keys.py
 *.db
 test*
