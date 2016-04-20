@@ -2,7 +2,11 @@
 Cache/*
 Tile_log/*
 keys.py
+Trends*
+Zoom10Tiles*
+cache*
+countries*
 *.db
 test*
-venv/*
+venv*
 __pycache__/
