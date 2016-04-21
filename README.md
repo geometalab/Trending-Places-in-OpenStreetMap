@@ -4,4 +4,15 @@
 
 This is an experimental bot to calculate the Trending places in OSM.
 
+Prereq: docker
+
+## Execution
+```shell
+docker build -t trendingplaces:v1 .
+```
+```shell
+docker run -v $(pwd):/src trendingplaces:v1
+```
+
+For further explaination, please read:
 See http://geometalab.github.io/Trending-Places-in-OpenStreetMap
