@@ -9,6 +9,6 @@ date_from=$(date "--date=${dataset_date} -${date_diff} day-1 day" +%Y-%m-%d)
 
 python3 fetch2.py --date_from=$date_from --date_to=$date_to >Trends.csv
 cat Trends.csv|python3 bubble.py --date_precision=1d --min_zoom=10 --max_zoom=19 --min_subz=10 --max_subz=10 --no_per_day>Zoom10Tiles.csv
-cat Zoom10Tiles.csv | python Top_trending.py --graph
-python Trending_Bot.py
+cat Zoom10Tiles.csv | python3 Top_trending.py --graph
+python3 Trending_Bot.py
 
