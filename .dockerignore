@@ -2,3 +2,9 @@
 __pycache__/
 venv*
 doc*
+Zoom10Tiles*
+Trends*
+*.db
+Tile_log
+Cache
+config

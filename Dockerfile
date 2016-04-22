@@ -15,4 +15,4 @@ ADD . /src
 
 RUN pip3 install -r requirements.txt
 
-CMD [".\main.sh"]
+CMD ["./main.sh"]
