@@ -2,12 +2,15 @@ import sys
 import argparse
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pylab as plt
 import datetime as dt
 import itertools as it
 from Caches import Cache
 from Database import TrendingDb
 from Reverse_Geocoding import ReverseGeoCode
+
 
 MAX_DATE = (dt.datetime.now()-dt.timedelta(days=2)).replace(hour=0,minute=0,second=0,microsecond=0)
 MIN_PERIOD = 7
