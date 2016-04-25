@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import datetime as dt
 
 
 class Cache:
@@ -57,4 +58,11 @@ class Cache:
         """
         extract_path = os.path.join(self.folder, name+'.csv')
         return os.path.exists(extract_path)
+
+    def __del__(self):
+        for item in os.listdir(self.folder):
+            st = os.stat(os.path.join(self.folder, item))
+            if not dt.datetime.fromtimestamp(st.st_mtime).date()== dt.datetime.now().date():
+                os.remove(os.path.join(self.folder, item))
+
 
