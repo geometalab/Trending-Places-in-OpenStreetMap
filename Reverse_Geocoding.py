@@ -222,7 +222,8 @@ class FormatOSMTrendingNames(ReverseGeoCode):
                 else:
                     value += ellipsis
                 break
-
+        if value.endswith(', '):
+            value = value[:value.rfind(', ')]
         return value
 
     @staticmethod
