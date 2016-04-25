@@ -55,14 +55,14 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folde
         ax.set_prop_cycle(plt.cycler('color', [plt.cm.Accent(i) for i in np.linspace(0, 1, limit)]))
         for item in places:
             lat, lon, country = item
-            result_items = ReverseGeoCode().get_address_attributes(lat, lon,10, 'city')
+            result_items = ReverseGeoCode().get_address_attributes(lat, lon,10, 'city', 'country_code')
             if 'city' not in result_items.keys():
                 mark = "%s(%s)" % (manipulate_display_name(result_items['display_name']), country)
             else:
                 if check_eng(result_items['city']):
-                    mark = "%s(%s)" % (result_items['city'], country)
+                    mark = "%s(%s)" % (result_items['city'], result_items['country_code'].upper())
                 else:
-                    mark = "%.2f %.2f (%s)" % (lat, lon, country)
+                    mark = "%.2f %.2f (%s)" % (lat, lon, result_items['country_code'].upper())
             gp = df.loc[item].plot(ax=ax, x='date', y='count', label=mark)
         ax.tick_params(axis='both', which='major', labelsize=10)
         plt.xlabel('Date', fontsize='small', verticalalignment='baseline', horizontalalignment='right')
