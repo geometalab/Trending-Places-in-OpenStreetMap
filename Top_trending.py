@@ -136,11 +136,12 @@ def top_trending(data, limit):
     fetch = 0
     head = limit
     topTrending = set()
+    upper_limit = len(data)
     while True:
         topTrending.update(set((data[fetch:head]).index.values))
         places, clusters = identify_cluster(topTrending)
         req = limit-len(places)-len(clusters)
-        if not req:
+        if not req or head > upper_limit:
             break
         fetch = head
         head += req
@@ -186,7 +187,9 @@ def resample_missing_values(df, date, period):
 
 
 def get_country(df,iso):
-    # TODO: Update the value of threshold according to country size for better cluster detection
+    # TODO: Update the value of threshold according to country size for better cluster detection?
+    global THRESHOLD
+    THRESHOLD = 0
     return df[df['countries'] == iso]
 
 
