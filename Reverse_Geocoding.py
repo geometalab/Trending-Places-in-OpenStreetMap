@@ -46,7 +46,7 @@ class ReverseGeoCode:
         self.data = json.loads(response.read().decode('utf-8'))
         response.close()
         if 'error' in self.data.keys():
-            raise Exception ('Wrong query, please check again')
+            self.data['display_name']="%.2f %.2f" % (lat, lon)
 
     def _get_city(self):
         """
