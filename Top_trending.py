@@ -218,10 +218,12 @@ def analyze_data(stdin, date, period, count, graph, country):
     tile_data.set_index(['lat','lon','countries'],inplace=True)
     high_outliers = tile_data[tile_data['t_score'] >= 3.5]
     high_outliers = high_outliers[high_outliers['abs_med'] >= 1000]
+    high_outliers = high_outliers.loc[(high_outliers['rolling_median']>3000) & (high_outliers['abs_med']>2000)]
+    #high_outliers = high_outliers[high_outliers['t_score'] <= 5.5]
     high_outliers.reset_index(inplace=True)
-    high_outliers['trending_rank'] = high_outliers.groupby('date')['abs_med'].apply(lambda x: (x-x.median())/x.median())
+    # high_outliers['trending_rank'] = high_outliers.groupby('date')['abs_med'].apply(lambda x: (x-x.median())/x.median())
     # g=(high_outliers['t_score']-high_outliers['t_score'].min())/(high_outliers['t_score'].max()-high_outliers['t_score'].min())
-    # high_outliers['trending_rank'] = g*high_outliers['abs_med']/high_outliers['rolling_median']
+    high_outliers['trending_rank'] = high_outliers['t_score']
     if not country:
         high_outliers['world_or_region'] = WORLD
     else:
