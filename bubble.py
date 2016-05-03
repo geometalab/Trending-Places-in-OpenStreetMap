@@ -14,6 +14,9 @@ MAX_DATE = '9999-99-99'
 MIN_ZOOM = 0
 MAX_ZOOM = 19
 
+count_weight = {
+    0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:1,13:1,14:1,15:2,16:4,17:8,18:16,19:32
+}
 cache_down = {}
 cache_up = {}
 cache_center = {}
@@ -219,12 +222,12 @@ def split(stdin, stdout, date_precision=None, per_day=False,
 
         if z < min_subz:
             for x, y, z in get_down_tiles(x, y, z, min_subz):
-                tiles[(date, z, x, y, countries)] += count
+                tiles[(date, z, x, y, countries)] += count*count_weight.get(z)
         if z > max_subz:
             x, y, z = get_up_tile(x, y, z, max_subz)
-            tiles[(date, z, x, y, countries)] += count
+            tiles[(date, z, x, y, countries)] += count*count_weight.get(z)
         if min_subz <= z <= max_subz:
-            tiles[(date, z, x, y, countries)] += count
+            tiles[(date, z, x, y, countries)] += count*count_weight.get(z)
 
     sys.stderr.write('%s - %s\n' % (flush_date, datetime.datetime.now() - start))
     flush(stdout, tiles, min_count, max_count, boudaries_geom, **kwargs)
