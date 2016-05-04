@@ -170,7 +170,7 @@ def split(stdin, stdout, date_precision=None, per_day=False,
                      ','.join(extras) or None, headers=True,  **kwargs)
 
     boudaries_geom = []
-    for boundary, extra in itertools.zip_longest(boundaries, extras):
+    for boundary, extra in itertools.izip_longest(boundaries, extras):
         if isinstance(boundary, str):
             boundary = shapely.geometry.shape(json.load(open(boundary)))
         if boundary_buffer is not None:
@@ -197,6 +197,7 @@ def split(stdin, stdout, date_precision=None, per_day=False,
     flush_date = None
 
     for line in stdin:
+        print (line)
         date, z, x, y, count, lat, lon, countries = line.decode().strip().split(',')
         if not date_from <= date <= date_to:
             continue
@@ -221,16 +222,25 @@ def split(stdin, stdout, date_precision=None, per_day=False,
             start = datetime.datetime.now()
 
         if z < min_subz:
-            for x, y, z in get_down_tiles(x, y, z, min_subz):
-                tiles[(date, z, x, y, countries)] += count*count_weight.get(z)
+            print ('Getting down tiles for(xyz):'+str(x)+':'+str(y)+':'+str(z))
+            for _x, _y, _z in get_down_tiles(x, y, z, min_subz):
+                print ('\tDown tiles(xyz):'+str(_x)+':'+str(_y)+':'+str(_z))
+                tiles[(date, _z, _x, _y, countries)] += count#*count_weight.get(z)
+                print ('\tAdding all down tiles'+str(tiles[(date, _z, _x, _y, countries)]))
         if z > max_subz:
-            x, y, z = get_up_tile(x, y, z, max_subz)
-            tiles[(date, z, x, y, countries)] += count*count_weight.get(z)
+            print ('Getting up tiles for(xyz):'+str(x)+':'+str(y)+':'+str(z))
+            _x, _y, _z = get_up_tile(x, y, z, max_subz)
+            print ('\tUp tiles(xyz):'+str(_x)+':'+str(_y)+':'+str(_z))
+            tiles[(date, _z, _x, _y, countries)] += count#*count_weight.get(z)
+            print ('\tAdding up tile'+str(tiles[(date, _z, _x, _y, countries)]))
         if min_subz <= z <= max_subz:
-            tiles[(date, z, x, y, countries)] += count*count_weight.get(z)
+            print ('Just sum (xyz):'+str(x)+':'+str(y)+':'+str(z))
+            tiles[(date, z, x, y, countries)] += count#*count_weight.get(z)
+            print ('\tAdding itslef'+str(tiles[(date, z, x, y, countries)]))
 
     sys.stderr.write('%s - %s\n' % (flush_date, datetime.datetime.now() - start))
     flush(stdout, tiles, min_count, max_count, boudaries_geom, **kwargs)
+
 
 
 if __name__ == '__main__':
