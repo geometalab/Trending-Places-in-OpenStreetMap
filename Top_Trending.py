@@ -57,11 +57,11 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folde
             lat, lon, country = item
             result_items = ReverseGeoCode().get_address_attributes(lat, lon,10, 'city', 'country_code')
             if 'city' not in result_items.keys():
-                mark = "%s(%s)" % (manipulate_display_name(result_items['display_name']),
+                mark = "%s (%s)" % (manipulate_display_name(result_items['display_name']),
                                    result_items['country_code'].upper() if 'country_code' in result_items.keys() else country)
             else:
                 if check_eng(result_items['city']):
-                    mark = "%s(%s)" % (result_items['city'], result_items['country_code'].upper())
+                    mark = "%s (%s)" % (result_items['city'], result_items['country_code'].upper())
                 else:
                     mark = "%.2f %.2f (%s)" % (lat, lon, result_items['country_code'].upper())
             gp = df.loc[item].plot(ax=ax, x='date', y='count', label=mark)
