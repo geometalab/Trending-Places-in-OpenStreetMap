@@ -90,7 +90,8 @@ def max_from_cluster(cluster, data):
 
 def export(places, clusters, data):
     for cluster in clusters:
-        places.add(max_from_cluster(cluster, data))
+        places.update(cluster)
+        #places.add(max_from_cluster(cluster, data))
     frame = pd.DataFrame()
     property = data.groupby(level=[0, 1, 2])
     for item in places:
@@ -216,12 +217,12 @@ def analyze_data(stdin, date, period, count, graph, country):
             tile_data = get_country(tile_data, country)
     tile_data = statistics(tile_data, period)
     tile_data.set_index(['lat','lon','countries'],inplace=True)
-    high_outliers = tile_data[tile_data['t_score'] >= 3.5]
+    high_outliers = tile_data[tile_data['t_score'] >= 2]
     high_outliers = high_outliers[high_outliers['abs_med'] >= 1000]
     high_outliers = high_outliers.loc[(high_outliers['rolling_median']>3000) & (high_outliers['abs_med']>2000)]
     #high_outliers = high_outliers[high_outliers['t_score'] <= 5.5]
     high_outliers.reset_index(inplace=True)
-    # high_outliers['trending_rank'] = high_outliers.groupby('date')['abs_med'].apply(lambda x: (x-x.median())/x.median())
+    #high_outliers['trending_rank'] = high_outliers.groupby('date')['abs_med'].apply(lambda x: (x-x.median())/x.median())
     # g=(high_outliers['t_score']-high_outliers['t_score'].min())/(high_outliers['t_score'].max()-high_outliers['t_score'].min())
     high_outliers['trending_rank'] = high_outliers['t_score']
     if not country:
