@@ -29,11 +29,11 @@ apt-get build-dep python3-lxml
 
 ### Running the code
 Step 1 and 2 are based on previous work done by Lucas Martinelli and Pavel Tyslacki on <a href="https://github.com/lukasmartinelli/map-trends">map-trends</a>.
-- *STEP 1:* Fetch the Tile Logs with ```python3 fetch2.py --date_from=(date_to-7 days back) --date_to=(today-2) >Trends.csv:```
+- *STEP 1:* Fetch the Tile Logs with ```python3 Fetch2.py --date_from=(date_to-7 days back) --date_to=(today-2) >Trends.csv:```
     - Fetches the tile logs for 7 days from http://planet.openstreetmap.org/tile_logs/
     - Extracts them
     - Finds lat/lon based on the tile center and groups it into the respective country to which it belongs
-- *STEP 2:* ```cat Trends.csv|python3 bubble.py --date_precision=1d --min_zoom=10
+- *STEP 2:* ```cat Trends.csv|python3 Bubble.py --date_precision=1d --min_zoom=10
  --max_zoom=19 --min_subz=10 --max_subz=10 --no_per_day>Zoom10Tiles.csv ```
     - The max/min_zoom specify the output zoom level i.e. all views aggregated here. 10 is selected as it is the optimal level to view cities
     - The min/max_subz specify the input levels to aggregate views. 
