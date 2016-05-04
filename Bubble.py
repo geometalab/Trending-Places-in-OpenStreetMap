@@ -218,11 +218,11 @@ def split(stdin, stdout, date_precision=None, per_day=False,
             start = datetime.datetime.now()
 
         if z < min_subz:
-            for x, y, z in get_down_tiles(x, y, z, min_subz):
-                tiles[(date, z, x, y, countries)] += count
+            for _x, _y, _z in get_down_tiles(x, y, z, min_subz):
+                tiles[(date, _z, _x, _y, countries)] += count
         if z > max_subz:
-            x, y, z = get_up_tile(x, y, z, max_subz)
-            tiles[(date, z, x, y, countries)] += count
+            _x, _y, _z = get_up_tile(x, y, z, max_subz)
+            tiles[(date, _z, _x, _y, countries)] += count
         if min_subz <= z <= max_subz:
             tiles[(date, z, x, y, countries)] += count
 
