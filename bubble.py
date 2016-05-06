@@ -15,7 +15,7 @@ MIN_ZOOM = 0
 MAX_ZOOM = 19
 
 count_weight = {
-    0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:1,13:1,14:1,15:2,16:4,17:8,18:16,19:32
+    0:0,1:0,2:0,3:1,4:2,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:1,13:1,14:1,15:2,16:4,17:8,18:16,19:32
 }
 cache_down = {}
 cache_up = {}
@@ -54,6 +54,8 @@ def get_up_tile(x, y, z, target_zoom):
 
 
 def get_date_precision(date, date_prec, date_prec_measure):
+#
+#
     if date not in cache_date:
         old_date = date
         if date_prec_measure == 'd':
@@ -115,6 +117,7 @@ FIELD_VALUES = (
 
 
 def flush_fields(stdout, date, count, z, x, y, lat, lon, countries, extra, headers=False, **kwargs):
+# Filters fields to go into the output file based on the input conditions and writes them out
     k = '%s/%s/%s' % (z, x, y)
     values = []
     for field, applier, filters in FIELD_VALUES:
@@ -127,10 +130,15 @@ def flush_fields(stdout, date, count, z, x, y, lat, lon, countries, extra, heade
 
     if extra is not None:
         values.append(extra)
+    # print ('Flushing: %s'% ','.join(str(value) for value in values))
     stdout.write(('%s\n' % ','.join(str(value) for value in values)).encode())
 
 
 def flush(stdout, tiles, min_count, max_count,  boundaries, **kwargs):
+# Filters out places with count less than or greather than specified
+# Recalculates the center of the tile date,z,x,y
+# writes out the tiles
+# if a boundary is specified, flush only those field inside the boundary
     for k, count in tiles.items():
         if min_count and count < min_count:
             continue
@@ -157,6 +165,8 @@ def split(stdin, stdout, date_precision=None, per_day=False,
           min_zoom=None, max_zoom=None,
           min_subz=None, max_subz=None,
           extras=tuple(), extra_header=None, **kwargs):
+
+    # Calculate the total days if a range has been specified
     if not kwargs.get('no_per_day'):
         date_from_parsed = datetime.datetime.strptime(date_from, '%Y-%m-%d')
         date_to_parsed = datetime.datetime.strptime(date_to, '%Y-%m-%d')
@@ -165,11 +175,13 @@ def split(stdin, stdout, date_precision=None, per_day=False,
         assert date_from_parsed < date_to_parsed
         kwargs['days'] = (date_to_parsed - date_from_parsed).days
 
+    # Print out the headers in the file
     if not kwargs.get('no_header'):
         flush_fields(stdout, 'date', 'count', 'z', 'x', 'y', 'lat', 'lon', 'countries',
                      ','.join(extras) or None, headers=True,  **kwargs)
 
     boudaries_geom = []
+    # In case a geo boundary is specified, convert it into geometry with a buffer
     for boundary, extra in itertools.izip_longest(boundaries, extras):
         if isinstance(boundary, str):
             boundary = shapely.geometry.shape(json.load(open(boundary)))
@@ -177,6 +189,7 @@ def split(stdin, stdout, date_precision=None, per_day=False,
             boundary = boundary.buffer(boundary_buffer)
         boudaries_geom.append((boundary, boundary.bounds, extra, id(boundary)))
     boudaries_geom = boudaries_geom or None
+
 
     if date_precision:
         date_prec = float(date_precision[:-1])
@@ -192,19 +205,24 @@ def split(stdin, stdout, date_precision=None, per_day=False,
     assert min_zoom <= max_zoom
     assert min_subz <= max_subz
 
+    # initialize empty tiles, start time and date processed first
     tiles = flush(stdout, {}, min_count, max_count, boudaries_geom, **kwargs)
     start = datetime.datetime.now()
     flush_date = None
 
     for line in stdin:
-        print (line)
+        # print (line[:-1])
         date, z, x, y, count, lat, lon, countries = line.decode().strip().split(',')
+
+        # Check if the date is within the date range
         if not date_from <= date <= date_to:
             continue
         count = int(count)
         x = int(x)
         y = int(y)
         z = int(z)
+        # count*=count_weight.get(z)
+        #print (count)
         if not min_zoom <= z <= max_zoom:
             continue
 
@@ -215,28 +233,30 @@ def split(stdin, stdout, date_precision=None, per_day=False,
             start = datetime.datetime.now()
             flush_date = date
 
+        #This assumes that input is grouped by date!!
         if date != flush_date:
             sys.stderr.write('%s - %s\n' % (flush_date, datetime.datetime.now() - start))
-            flush(stdout, tiles, min_count, max_count, boudaries_geom, **kwargs)
+            ############ FIXED ANOTHER BUG ###################
+            tiles=flush(stdout, tiles, min_count, max_count, boudaries_geom, **kwargs)
             flush_date = date
             start = datetime.datetime.now()
 
         if z < min_subz:
-            print ('Getting down tiles for(xyz):'+str(x)+':'+str(y)+':'+str(z))
+            # print ('Getting down tiles for(xyz):'+str(x)+':'+str(y)+':'+str(z))
             for _x, _y, _z in get_down_tiles(x, y, z, min_subz):
-                print ('\tDown tiles(xyz):'+str(_x)+':'+str(_y)+':'+str(_z))
+                # print ('\tDown tiles(xyz):'+str(_x)+':'+str(_y)+':'+str(_z))
                 tiles[(date, _z, _x, _y, countries)] += count#*count_weight.get(z)
-                print ('\tAdding all down tiles'+str(tiles[(date, _z, _x, _y, countries)]))
+                # print ('\tAdding all down tiles'+str(tiles[(date, _z, _x, _y, countries)]))
         if z > max_subz:
-            print ('Getting up tiles for(xyz):'+str(x)+':'+str(y)+':'+str(z))
+            # print ('Getting up tiles for(xyz):'+str(x)+':'+str(y)+':'+str(z))
             _x, _y, _z = get_up_tile(x, y, z, max_subz)
-            print ('\tUp tiles(xyz):'+str(_x)+':'+str(_y)+':'+str(_z))
+            # print ('\tUp tiles(xyz):'+str(_x)+':'+str(_y)+':'+str(_z))
             tiles[(date, _z, _x, _y, countries)] += count#*count_weight.get(z)
-            print ('\tAdding up tile'+str(tiles[(date, _z, _x, _y, countries)]))
+            # print ('\tAdding up tile'+str(tiles[(date, _z, _x, _y, countries)]))
         if min_subz <= z <= max_subz:
-            print ('Just sum (xyz):'+str(x)+':'+str(y)+':'+str(z))
-            tiles[(date, z, x, y, countries)] += count#*count_weight.get(z)
-            print ('\tAdding itslef'+str(tiles[(date, z, x, y, countries)]))
+            # print ('Just sum (xyz):'+str(x)+':'+str(y)+':'+str(z))
+            tiles[(date, z, x, y, countries)] += count
+            # print ('\tAdding itslef'+str(tiles[(date, z, x, y, countries)]))
 
     sys.stderr.write('%s - %s\n' % (flush_date, datetime.datetime.now() - start))
     flush(stdout, tiles, min_count, max_count, boudaries_geom, **kwargs)
