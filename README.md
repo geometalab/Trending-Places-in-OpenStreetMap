@@ -4,9 +4,13 @@
 
 This is an experimental bot to calculate the Trending places in OSM.
 
+Note: The first execution might take a few hours, but it shold become faster thereafter.
+
 ## Execution with Docker
 
 >*Prerequsite:* docker
+
+Clone this repository and make it your active folder. Then run the following:
 
 ```shell
 docker build -t trendingplaces:v1 .
