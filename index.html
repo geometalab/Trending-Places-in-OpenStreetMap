@@ -65,7 +65,7 @@
           to track these artifacts makes it difficult to filter them out and they often hamper the results.
           Certain artifacts like the curve trail over Russia on the upper right hand side is a periodic crawling
           phenomenon. </p>
-<img src="images\artifacts_data.png" alt="Preview not available.", align="middle">
+<img src="images/artifacts_data.png" alt="Preview not available.", align="middle">
 <p align="center"><i>Fig. January, 2016 All places with views. Major Discrepancies highlighted</i></p>
           <li><h4>Clustering around a trending place</h4></li>
           <p> While filtering out top n trending places, often the n places that appear are quite close
@@ -73,7 +73,7 @@
           users tend to view an several tiles close by while viewing a particular place. A small algorithm to
           detect these clusters and reserve only the highest viewed place amongst the top trending was added
           in the code and this issue was resolved.</p>
-              <img src="images\clustered_places.jpg" alt="Preview not available.", align="middle">
+              <img src="images/clustered_places.jpg" alt="Preview not available.", align="middle">
               <p align="center"><i>Fig. January 31st 2016, Graph of total views vs. date of top 10 trending places.
               The similar structure of the graphs suggest that the places are a cluster and have been viewed together.</i></p
           <li><h4>Ranking the importance of trending places</h4></li>
@@ -82,12 +82,12 @@
               the views on a particular day are away from the mean. After analysis and testing of the OSM data, a cut off T-score
               of 3.5 was  decided. However, on fetched top 'x' places with the highest T-score implying highest deviation from
               mean often resulted in displaying insignificant peaks as can be compared in Fig. A and Fig B. below.</p>
-              <img src="images\Unusual_spike.jpg" alt="Preview not available.", align="center">
+              <img src="images/Unusual_spike.jpg" alt="Preview not available.", align="center">
               <p align="center"><i>Fig A. January 31st 2016, Graph of total views vs. date of lat, lon: -84.79, -140.58 in Antarctica.
               with the T-score pointed out. It can be seen that the place has almost 0 views usually, but a small spike of
               nearly 75 views gives it a very high Tscore of nearly 6. The question is, how important is the trend for this place
               versus another place with regular views?</i></p>
-              <img src="images\Normal_spike.jpg" alt="Preview not available.", align="middle">
+              <img src="images/Normal_spike.jpg" alt="Preview not available.", align="middle">
               <p align="center"><i>Fig B. January 31st 2016, Graph of total views vs. date of lat, lon: -84.79, 1.3623.58 in Antarctica.
               with the T-score pointed out. The place has regular views and a T-score of 5.77 when the deviation from the average
               views is nearly 1000. Compared to the place in Fig A. Should this have a higher trend?</i></p>
@@ -102,7 +102,7 @@
 <h3>Example of Positive Result</h3>
           <p>Fort McMurray, Canada was a <a href="http://news.nationalpost.com/news/canada/fort-mcmurray-fire-now-too-large-too-fierce-to-stop-without-rain">victim of wildfire </a> in the beginning of May 2016.
           It appeared on the Trending places on 4th May, 2016.</p>
-            <img src="images\Fort_McMurray_result.png" alt="Preview not available.", align="middle">
+            <img src="images/Fort_McMurray_result.png" alt="Preview not available.", align="middle">
            <p align="center"><i>Fig. shows the Twitte bot tweet on 4th May, 2016 with the attached graph for the Top 10 trending places
            and the status text. Due to a limit on the length of tweet the names of all Trending places are not tweeted
            and Ellipsis is appended after the word limit is reached. However, all names can be seen on the graph.
