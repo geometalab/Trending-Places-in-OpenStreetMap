@@ -112,6 +112,7 @@ FIELD_VALUES = (
 
 
 def flush_fields(stdout, date, count, z, x, y, lat, lon, countries, extra, headers=False, **kwargs):
+    # Filters fields to go into the output file based on the input conditions and writes them out
     k = '%s/%s/%s' % (z, x, y)
     values = []
     for field, applier, filters in FIELD_VALUES:
@@ -128,6 +129,10 @@ def flush_fields(stdout, date, count, z, x, y, lat, lon, countries, extra, heade
 
 
 def flush(stdout, tiles, min_count, max_count,  boundaries, **kwargs):
+    # Filters out places with count less than or greater than specified
+    # Recalculates the center of the tile date,z,x,y
+    # writes out the tiles
+    # if a boundary is specified, flush only those field inside the boundary
     for k, count in tiles.items():
         if min_count and count < min_count:
             continue
@@ -154,6 +159,8 @@ def split(stdin, stdout, date_precision=None, per_day=False,
           min_zoom=None, max_zoom=None,
           min_subz=None, max_subz=None,
           extras=tuple(), extra_header=None, **kwargs):
+
+    # Calculate the total days if a range has been specified
     if not kwargs.get('no_per_day'):
         date_from_parsed = datetime.datetime.strptime(date_from, '%Y-%m-%d')
         date_to_parsed = datetime.datetime.strptime(date_to, '%Y-%m-%d')
@@ -162,11 +169,14 @@ def split(stdin, stdout, date_precision=None, per_day=False,
         assert date_from_parsed < date_to_parsed
         kwargs['days'] = (date_to_parsed - date_from_parsed).days
 
+    # Print out the headers in the file
     if not kwargs.get('no_header'):
         flush_fields(stdout, 'date', 'count', 'z', 'x', 'y', 'lat', 'lon', 'countries',
                      ','.join(extras) or None, headers=True,  **kwargs)
 
     boudaries_geom = []
+    # In case a geo boundary is specified, convert it into geometry with a buffer.
+    # The code related to filtering places inside a specified boundary is untested at the moment.
     for boundary, extra in itertools.zip_longest(boundaries, extras):
         if isinstance(boundary, str):
             boundary = shapely.geometry.shape(json.load(open(boundary)))
@@ -189,12 +199,15 @@ def split(stdin, stdout, date_precision=None, per_day=False,
     assert min_zoom <= max_zoom
     assert min_subz <= max_subz
 
+    # initialize empty tiles, start time and date processed first
     tiles = flush(stdout, {}, min_count, max_count, boudaries_geom, **kwargs)
     start = datetime.datetime.now()
     flush_date = None
 
     for line in stdin:
         date, z, x, y, count, lat, lon, countries = line.decode().strip().split(',')
+
+        # Check if the date is within the date range
         if not date_from <= date <= date_to:
             continue
         count = int(count)
@@ -211,9 +224,10 @@ def split(stdin, stdout, date_precision=None, per_day=False,
             start = datetime.datetime.now()
             flush_date = date
 
+        # This assumes that input is grouped by date.
         if date != flush_date:
             sys.stderr.write('%s - %s\n' % (flush_date, datetime.datetime.now() - start))
-            flush(stdout, tiles, min_count, max_count, boudaries_geom, **kwargs)
+            tiles = flush(stdout, tiles, min_count, max_count, boudaries_geom, **kwargs)
             flush_date = date
             start = datetime.datetime.now()
 
