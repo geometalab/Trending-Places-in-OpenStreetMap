@@ -194,6 +194,12 @@ def get_country(df,iso):
     return df[df['countries'] == iso]
 
 
+def check_data_validity(df, period):
+    if len(df.date.unique()) != period:
+        return False
+    return True
+
+
 def analyze_data(stdin, date, period, count, graph, country):
     if not date:
         date = MAX_DATE
@@ -204,6 +210,9 @@ def analyze_data(stdin, date, period, count, graph, country):
     if not cache.existing(RESAMPLE+str(date.date())):
         tile_data = pd.read_csv(stdin, sep=',', parse_dates=['data'], keep_default_na=False)
         tile_data.rename(columns={'data': 'date'}, inplace=True)
+        if not check_data_validity(tile_data,period):
+            raise AssertionError('Data is missing')
+            exit(0)
         tile_data.drop_duplicates(inplace=True)
         if country:
             tile_data = get_country(tile_data, country)
