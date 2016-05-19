@@ -11,8 +11,13 @@ RUN apt-get build-dep -y \
  
 WORKDIR /src
 
-ADD . /src
+ADD requirements.txt /src
 
 RUN pip3 install -r requirements.txt
 
-CMD ["./main.sh"]
+ADD . /src
+
+RUN crontab crons.conf \
+	chmod 777 main.sh
+
+CMD ["cron","-f"]
