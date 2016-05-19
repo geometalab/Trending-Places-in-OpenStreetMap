@@ -27,7 +27,7 @@ class TrendingTweepy:
             self.config['ACCESS_TOKEN_SECRET']=os.environ['ACCESS_TOKEN_SECRET']
             self.config['ACCESS_TOKEN']=os.environ['ACCESS_TOKEN']
         except KeyError as e:
-            raise Exception('The configuration file is missing parameters')
+            raise Exception('The environment variable for twitter bot authentication are missing')
         # Authentication
         self.auth = tweepy.OAuthHandler(self.config['CONSUMER_KEY'], self.config['CONSUMER_SECRET'])
         self.auth.set_access_token(self.config['ACCESS_TOKEN'], self.config['ACCESS_TOKEN_SECRET'])
