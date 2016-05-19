@@ -18,7 +18,16 @@ class TrendingTweepy:
 
     def __init__(self, conf_file='config'):
         self.config = {}
-        self._config_bot(conf_file)
+        # No longer accessing configuration details from a file, uncomment this to run with a text file
+        # self._config_bot(conf_file)
+        # Configure with environemnt variables on unix based systems
+        try:
+            self.config['CONSUMER_KEY']=os.environ['CONSUMER_KEY']
+            self.config['CONSUMER_SECRET']=os.environ['CONSUMER_SECRET']
+            self.config['ACCESS_TOKEN_SECRET']=os.environ['ACCESS_TOKEN_SECRET']
+            self.config['ACCESS_TOKEN']=os.environ['ACCESS_TOKEN']
+        except KeyError as e:
+            raise Exception('The configuration file is missing parameters')
         # Authentication
         self.auth = tweepy.OAuthHandler(self.config['CONSUMER_KEY'], self.config['CONSUMER_SECRET'])
         self.auth.set_access_token(self.config['ACCESS_TOKEN'], self.config['ACCESS_TOKEN_SECRET'])
