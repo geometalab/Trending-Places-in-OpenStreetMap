@@ -10,13 +10,21 @@ Note: The first execution might take a few hours, but it shold become faster the
 
 >*Prerequsite:* docker
 
-Clone this repository and make it your active folder. Then run the following:
+Clone this repository and make it your active folder.  
+If you want the twitter bot to Tweet a status, register as a developer on twitter and obtain the 4 keys to authenticate your twitter bot. The four variables required are mentioned in the sample config file.
+These need to be set as environment variables system and/or in your docker container.
+Example: (You need to repeat this for all four or directly input it in the docker container with -e) 
+
+ ```shell
+CONSUMER_KEY="somevaluehere"
+ ```
+Then run the following:
 
 ```shell
 docker build -t trendingplaces:v1 .
 ```
 ```shell
-docker run -v $(pwd):/src trendingplaces:v1
+docker run -e CONSUMER_KEY -e CONSUMER_SECRET -e ACCESS_TOKEN -e ACCESS_TOKEN_SECRET trendingplaces:v1 ./main.sh
 ```
 ## Execution manually
 
