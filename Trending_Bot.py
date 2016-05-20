@@ -18,8 +18,6 @@ class TrendingTweepy:
 
     def __init__(self, conf_file='config'):
         self.config = {}
-        # No longer accessing configuration details from a file, uncomment this to run with a text file
-        # self._config_bot(conf_file)
         # Configure with environemnt variables on unix based systems
         try:
             self.config['CONSUMER_KEY']=os.environ['CONSUMER_KEY']
@@ -170,15 +168,6 @@ class TrendingTweepy:
         """
         Runs the main tweepy smallbot
         """
-        #while True:
-            # check followers every 5 minutes
-            #if (time.time() - self.state['last_follow_check']) > 5*60:
-            #    self._check_followers()
-            #    self._handle_followers()
-
-            # Tweet once every 24hours
-            #if (time.time() - self.state['last_tweet']) > MINUTES_INTERVAL_TWEET*60:
-                #self.tweet_status_trends()
         self.tweet_status_trends()
 
 
