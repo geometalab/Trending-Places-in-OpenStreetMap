@@ -59,7 +59,7 @@ Step 1 and 2 are based on previous work done by Lucas Martinelli and Pavel Tysla
    - *The output:* trending_places.png (Optional)  
                    trending_places.db (containing the lat/lon/count etc)  
 - *STEP 4:* ``` python3 Trending_Bot.py```
-  Before running this twitter bot, you will need to set up your twitter developer account and **add in the consumer and token access keys in the config file**! A sample format is available on github.
+  Before running this twitter bot, you will need to set up your twitter developer account and **add in the consumer and token access keys as environment variables in your system before this**! A sample format is available on github.
 
 
 For further explaination, please read:
