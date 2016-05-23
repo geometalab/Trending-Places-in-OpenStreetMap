@@ -1,9 +1,10 @@
-FROM ubuntu
+FROM ubuntu:14.04
 MAINTAINER Bhavya bchandra@hsr.ch
 
 RUN apt-get update && apt-get install -y\
 	libgeos-dev \ 
-	python3-pip
+	python3-pip \
+	cron
 
 RUN apt-get build-dep -y \
 	python-matplotlib \
