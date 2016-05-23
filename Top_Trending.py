@@ -8,7 +8,7 @@ import itertools as it
 from Caches import Cache
 from Database import TrendingDb
 from Reverse_Geocoding import ReverseGeoCode
-matplotlib.use('Agg')
+matplotlib.use('Agg') # noqa
 import matplotlib.pylab as plt
 
 MAX_DATE = (dt.datetime.now() - dt.timedelta(days=2)).replace(hour=0, minute=0, second=0, microsecond=0)
@@ -65,6 +65,7 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folde
                     mark = "%.2f %.2f (%s)" % (lat, lon, result_items['country_code'].upper())
             gp = df.loc[item].plot(ax=ax, x='date', y='count', label=mark)
         ax.tick_params(axis='both', which='major', labelsize=10)
+        ax.set_yscale("log", nonposy='clip')
         plt.xlabel('Date', fontsize='small', verticalalignment='baseline', horizontalalignment='right')
         plt.ylabel('Total number of views', fontsize='small', verticalalignment='center', horizontalalignment='center', labelpad=6)
         gp.legend(loc='best', fontsize='xx-small', ncol=2)
