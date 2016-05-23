@@ -150,10 +150,10 @@ def top_trending(data, limit):
 
 def statistics(df, period):
     df['t_score'] = df.groupby(['lat', 'lon', 'countries'])['count'].apply(
-                               lambda x: (x - x.rolling(period, period).mean()) * np.sqrt(period) /
-                               x.rolling(period, period).std())
+            lambda x: (x - x.rolling(period, period).mean()) * np.sqrt(period) /
+                      x.rolling(period, period).std())
     df['rolling_median'] = df.groupby(['lat', 'lon', 'countries'])['count'].apply(
-                               lambda x: x.rolling(period, period).median())
+            lambda x: x.rolling(period, period).median())
     df['abs_med'] = df['count'] - df['rolling_median']
     return df
 
