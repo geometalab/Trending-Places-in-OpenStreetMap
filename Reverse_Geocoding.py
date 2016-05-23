@@ -8,7 +8,7 @@ class ReverseGeoCode:
 
     def __init__(self, link='http://nominatim.openstreetmap.org/reverse.php?',
                  query='lat=%f&lon=%f&zoom=%d&format=json&accept-language=en', email='geometalab@gmail.com'):
-        self.query = query+'&email=' + email
+        self.query = query + '&email=' + email
         self.query_from_id = 'osm_id=%f&osm_type=%s&format=json&accept-language=en&email=' + email
         self.fetch_from_id = link + self.query_from_id
         self.fetch = link + self.query
@@ -73,7 +73,7 @@ class ReverseGeoCode:
         except KeyError:
             return ''
 
-    def get_cities_from_file(self, date, region, db = TrendingDb()):
+    def get_cities_from_file(self, date, region, db=TrendingDb()):
         """
         Fetches a list of cities in the top trending places.
         The csv file must have a lat and lon column in order to reverse geocode
@@ -137,11 +137,11 @@ class FormatOSMTrendingNames(ReverseGeoCode):
         if i == len(list):
             i -= 1
         if len(list[i].strip()) > max_len:
-            return list[i][:max_len-3].strip() + '...'
+            return list[i][:max_len - 3].strip() + '...'
         else:
             return list[i].strip()
 
-    def get_cities_from_file(self, date, region, char_limit,db = TrendingDb()):
+    def get_cities_from_file(self, date, region, char_limit, db=TrendingDb()):
         """
         Returns formatted city names of the top trending palaces chopped off at the specified character limit,
         and returns False if the output of the trending places does not exist.
@@ -175,11 +175,11 @@ class FormatOSMTrendingNames(ReverseGeoCode):
                 name = FormatOSMTrendingNames._manipulate_display_name(name)
 
             if len(name) > max_len:
-                name = name[:max_len-3]
+                name = name[:max_len - 3]
                 name.strip()
                 temp = name.split(' ')
-                if len(temp[len(temp)-1]) < min_len:
-                    name = name.replace(temp[len(temp)-1], '').strip()
+                if len(temp[len(temp) - 1]) < min_len:
+                    name = name.replace(temp[len(temp) - 1], '').strip()
                 name += ellipsis
             else:
                 name += ' '
@@ -188,12 +188,12 @@ class FormatOSMTrendingNames(ReverseGeoCode):
                 value += name + country + ', '
             else:
                 if len(value + name + country) <= char_limit:
-                    value += name+country
+                    value += name + country
                 else:
                     value = value[:value.rfind(', ')]
                 final_len = len(value + ellipsis)
                 if final_len > char_limit:
-                    value = value[:char_limit-final_len] + ellipsis
+                    value = value[:char_limit - final_len] + ellipsis
                 else:
                     value += ellipsis
                 break

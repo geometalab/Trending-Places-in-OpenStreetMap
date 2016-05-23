@@ -11,7 +11,7 @@ from Reverse_Geocoding import ReverseGeoCode
 matplotlib.use('Agg')
 import matplotlib.pylab as plt
 
-MAX_DATE = (dt.datetime.now() - dt.timedelta(days = 2)).replace(hour=0, minute=0, second=0, microsecond=0)
+MAX_DATE = (dt.datetime.now() - dt.timedelta(days=2)).replace(hour=0, minute=0, second=0, microsecond=0)
 MIN_PERIOD = 7
 THRESHOLD = 0.5
 RESAMPLE = 'resampled'
@@ -54,7 +54,7 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folde
         ax.set_prop_cycle(plt.cycler('color', [plt.cm.Accent(i) for i in np.linspace(0, 1, limit)]))
         for item in places:
             lat, lon, country = item
-            result_items = ReverseGeoCode().get_address_attributes(lat, lon,10, 'city', 'country_code')
+            result_items = ReverseGeoCode().get_address_attributes(lat, lon, 10, 'city', 'country_code')
             if 'city' not in result_items.keys():
                 mark = "%s (%s)" % (manipulate_display_name(result_items['display_name']),
                                     result_items['country_code'].upper() if 'country_code' in result_items.keys() else country)
@@ -151,9 +151,9 @@ def top_trending(data, limit):
 def statistics(df, period):
     df['t_score'] = df.groupby(['lat', 'lon', 'countries'])['count'].apply(
                                lambda x: (x - x.rolling(period, period).mean()) * np.sqrt(period) /
-                               x.rolling(period,period).std())
+                               x.rolling(period, period).std())
     df['rolling_median'] = df.groupby(['lat', 'lon', 'countries'])['count'].apply(
-                                      lambda x: x.rolling(period, period).median())
+                               lambda x: x.rolling(period, period).median())
     df['abs_med'] = df['count'] - df['rolling_median']
     return df
 
@@ -178,9 +178,9 @@ def resample_missing_values(df, date, period):
     df.groupby(['lat', 'lon', 'countries']).fillna(method='ffill', inplace=True)
     df.groupby(['lat', 'lon', 'countries']).fillna(method='bfill', inplace=True)
     df.reset_index(inplace=True)
-    idx = pd.DatetimeIndex(start=date-dt.timedelta(days=(period - 1)), end=date, freq='D')
+    idx = pd.DatetimeIndex(start=date - dt.timedelta(days=(period - 1)), end=date, freq='D')
     new_df = pd.DataFrame()
-    for index,group in df.groupby(['lat', 'lon', 'countries']):
+    for index, group in df.groupby(['lat', 'lon', 'countries']):
         group = expand_date_range(group, idx)
         new_df = pd.concat([new_df, group])
     new_df.rename(columns={'index': 'date'}, inplace=True)
@@ -228,7 +228,7 @@ def analyze_data(stdin, date, period, count, graph, country):
     high_outliers = tile_data[tile_data['t_score'] >= 3.5]
     high_outliers = high_outliers[high_outliers['abs_med'] >= 1000]
     high_outliers.reset_index(inplace=True)
-    high_outliers['trending_rank'] = high_outliers.groupby('date')['abs_med'].apply(lambda x: (x-x.median())/x.median())
+    high_outliers['trending_rank'] = high_outliers.groupby('date')['abs_med'].apply(lambda x: (x - x.median()) / x.median())
     # g=(high_outliers['t_score']-high_outliers['t_score'].min())/(high_outliers['t_score'].max()-high_outliers['t_score'].min())
     # high_outliers['trending_rank'] = g*high_outliers['abs_med']/high_outliers['rolling_median']
     if not country:
@@ -246,13 +246,13 @@ def analyze_data(stdin, date, period, count, graph, country):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Determine and graph top 10 trending places')
-    parser.add_argument('--date',default=None, help='The date to calculate trending places (min 3 days ago)')
+    parser.add_argument('--date', default=None, help='The date to calculate trending places (min 3 days ago)')
     parser.add_argument('--period', type=int, default=7, help='Period of days to analyse trends (min 7)')
-    parser.add_argument('--count', type=int,default=10, help='Give the trending country')
-    parser.add_argument('--graph', action='store_true',default=False, help='Create the graphs of top n Trending places')
+    parser.add_argument('--count', type=int, default=10, help='Give the trending country')
+    parser.add_argument('--graph', action='store_true', default=False, help='Create the graphs of top n Trending places')
     parser.add_argument('--country', default=None, help='ISO code for country to find trending places within')
 
     stdin = sys.stdin if sys.version_info.major == 2 else sys.stdin.buffer
     stdout = sys.stdout if sys.version_info.major == 2 else sys.stdout.buffer
 
-    analyze_data(stdin,**parser.parse_args().__dict__)
+    analyze_data(stdin, **parser.parse_args().__dict__)
