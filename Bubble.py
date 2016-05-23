@@ -128,7 +128,7 @@ def flush_fields(stdout, date, count, z, x, y, lat, lon, countries, extra, heade
     stdout.write(('%s\n' % ','.join(str(value) for value in values)).encode())
 
 
-def flush(stdout, tiles, min_count, max_count,  boundaries, **kwargs):
+def flush(stdout, tiles, min_count, max_count, boundaries, **kwargs):
     # Filters out places with count less than or greater than specified
     # Recalculates the center of the tile date,z,x,y
     # writes out the tiles
@@ -172,7 +172,7 @@ def split(stdin, stdout, date_precision=None, per_day=False,
     # Print out the headers in the file
     if not kwargs.get('no_header'):
         flush_fields(stdout, 'date', 'count', 'z', 'x', 'y', 'lat', 'lon', 'countries',
-                     ','.join(extras) or None, headers=True,  **kwargs)
+                     ','.join(extras) or None, headers=True, **kwargs)
 
     boudaries_geom = []
     # In case a geo boundary is specified, convert it into geometry with a buffer.

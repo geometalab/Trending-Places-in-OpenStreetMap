@@ -23,7 +23,7 @@ class Cache:
         -------
 
         """
-        dump_path = os.path.join(self.folder, name+'.csv')
+        dump_path = os.path.join(self.folder, name + '.csv')
         df.to_csv(dump_path, sep=';', index=False)
 
     def extracting(self, name):
@@ -39,7 +39,7 @@ class Cache:
 
         """
         try:
-            extract_path = os.path.join(self.folder, name+'.csv')
+            extract_path = os.path.join(self.folder, name + '.csv')
             return pd.read_csv(extract_path, sep=';', parse_dates=['date'], keep_default_na=False)
         except IOError:
             return False
@@ -56,13 +56,11 @@ class Cache:
         -------
 
         """
-        extract_path = os.path.join(self.folder, name+'.csv')
+        extract_path = os.path.join(self.folder, name + '.csv')
         return os.path.exists(extract_path)
 
     def __del__(self):
         for item in os.listdir(self.folder):
             st = os.stat(os.path.join(self.folder, item))
-            if not dt.datetime.fromtimestamp(st.st_mtime).date()== dt.datetime.now().date():
+            if not dt.datetime.fromtimestamp(st.st_mtime).date() == dt.datetime.now().date():
                 os.remove(os.path.join(self.folder, item))
-
-

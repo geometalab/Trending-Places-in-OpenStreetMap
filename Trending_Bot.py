@@ -8,10 +8,9 @@ import time
 import os
 
 TWITTER_STATUS_LIMIT = 116  # with image
-MINUTES_INTERVAL_TWEET = 24*60  # once everyday
-DELAY_MIN = 30  # If trending places output doesnt exist, check after 30 mins
-DATE = (dt.datetime.now()-dt.timedelta(days=2)).replace(hour=0, minute=0, second=0, microsecond=0)
-REGION = 'world'  #Hard coded for now
+DATE = (dt.datetime.now() - dt.timedelta(days=2)).replace(hour=0, minute=0, second=0, microsecond=0)
+REGION = 'world'  # Hard coded for now
+ERROR_MSG = 'Trending places bot has been unable to find data for the last few days...It will return tomorrow'
 
 
 class TrendingTweepy:
@@ -20,11 +19,11 @@ class TrendingTweepy:
         self.config = {}
         # Configure with environemnt variables on unix based systems
         try:
-            self.config['CONSUMER_KEY']=os.environ['CONSUMER_KEY']
-            self.config['CONSUMER_SECRET']=os.environ['CONSUMER_SECRET']
-            self.config['ACCESS_TOKEN_SECRET']=os.environ['ACCESS_TOKEN_SECRET']
-            self.config['ACCESS_TOKEN']=os.environ['ACCESS_TOKEN']
-        except KeyError as e:
+            self.config['CONSUMER_KEY'] = os.environ['CONSUMER_KEY']
+            self.config['CONSUMER_SECRET'] = os.environ['CONSUMER_SECRET']
+            self.config['ACCESS_TOKEN_SECRET'] = os.environ['ACCESS_TOKEN_SECRET']
+            self.config['ACCESS_TOKEN'] = os.environ['ACCESS_TOKEN']
+        except KeyError:
             raise Exception('The environment variable for twitter bot authentication are missing')
         # Authentication
         self.auth = tweepy.OAuthHandler(self.config['CONSUMER_KEY'], self.config['CONSUMER_SECRET'])
@@ -33,7 +32,7 @@ class TrendingTweepy:
         self.api = tweepy.API(self.auth)
 
         # Self details
-        self.followers={}
+        self.followers = {}
         self.id = self.api.me().id
         self.screen_name = self.api.me().screen_name
         self.followers['existing'] = self.api.followers_ids(self.id)
@@ -53,7 +52,7 @@ class TrendingTweepy:
 
         logging.info('Initializing bot...')
 
-    def on_follow(self,f_id):
+    def on_follow(self, f_id):
         """
         Follow back on being followed
         """
@@ -71,18 +70,17 @@ class TrendingTweepy:
         logging.info("Updating status with Trending places....")
 
         try:
-            base_text = "Top trending places in #OSM "+DATE.strftime('%d/%m')+': '
+            base_text = "Top trending places in #OSM " + DATE.strftime('%d/%m') + ': '
             end_text = ''
-            count_available = TWITTER_STATUS_LIMIT-len(base_text)-len(end_text)
-            text = Ft().get_cities_from_file(str(DATE.date()),REGION,count_available)
-            img = Ft.get_trending_graph(str(DATE.date()),REGION)
+            count_available = TWITTER_STATUS_LIMIT - len(base_text) - len(end_text)
+            text = Ft().get_cities_from_file(str(DATE.date()), REGION, count_available)
+            img = Ft.get_trending_graph(str(DATE.date()), REGION)
             if text:
-                self.api.update_with_media(img, base_text+text+end_text)
+                self.api.update_with_media(img, base_text + text + end_text)
                 self.state['last_tweet'] = time.time()
             else:
-                # Check after 30 mins
+                self.api.update_status(ERROR_MSG)
                 logging.info("Could not update status. Rechecking in a while....")
-                self.state['last_tweet'] = time.time()+(DELAY_MIN-MINUTES_INTERVAL_TWEET)*60
 
         except tweepy.TweepError as e:
             self._log_tweepy_error('Can\'t update status because', e)
@@ -105,8 +103,8 @@ class TrendingTweepy:
         """
         pass
 
-    def _config_bot(self,file):
-        with open(file,'r') as conf_file:
+    def _config_bot(self, file):
+        with open(file, 'r') as conf_file:
             for line in conf_file:
                 try:
                     configuration, value = line.split('=')
@@ -114,9 +112,9 @@ class TrendingTweepy:
                 except ValueError as e:
                     self._log_tweepy_error('Wrong configuration parameters', e)
 
-        check_values = ['CONSUMER_KEY','CONSUMER_SECRET', 'ACCESS_TOKEN_SECRET', 'ACCESS_TOKEN']
+        check_values = ['CONSUMER_KEY', 'CONSUMER_SECRET', 'ACCESS_TOKEN_SECRET', 'ACCESS_TOKEN']
 
-        if len((check_values-self.config.keys())) != 0:
+        if len((check_values - self.config.keys())) != 0:
             raise Exception('The configuration file is missing parameters')
 
     def log(self, message, level=logging.INFO):
@@ -139,7 +137,7 @@ class TrendingTweepy:
         """
         logging.info("Following back all followers....")
         try:
-            self.followers['new']=list(set(self.followers['existing'])-set(self.friends))
+            self.followers['new'] = list(set(self.followers['existing']) - set(self.friends))
             self._handle_followers()
         except tweepy.TweepError as e:
             self._log_tweepy_error('Can\'t follow back existing followers', e)
@@ -174,6 +172,3 @@ class TrendingTweepy:
 if __name__ == '__main__':
     smallbot = TrendingTweepy()
     smallbot.run()
-
-
-

@@ -27,6 +27,7 @@ FETCH_QUERY = "SELECT * FROM %s WHERE last_day='%s' and world_or_region='%s'"
 FETCH_QUERY_IMG = "SELECT Img FROM %s WHERE date='%s' and region='%s'"
 WORLD = 'world'
 
+
 class TrendingDb:
 
     def __init__(self, db_name='trending_places.db'):
@@ -86,11 +87,11 @@ class TrendingDb:
         True if Image is written out successfully else return False.
         """
         try:
-            fout = open(file,'wb')
+            fout = open(file, 'wb')
             fout.write(data)
             return True
         except IOError as e:
-            print (e)
+            print(e)
             return False
         except TypeError:
             if fout:
@@ -179,7 +180,7 @@ class TrendingDb:
             data = cur.execute(FETCH_QUERY_IMG % (table_name, date, region)).fetchone()
             cur.close()
         if data:
-             return self._write_img(data[0], file_out)
+            return self._write_img(data[0], file_out)
         else:
             return False
 
@@ -234,12 +235,10 @@ class TrendingDb:
         with self.con:
             cur = self.con.cursor()
             if self._check_existing(table_name=table_name):
-                data = cur.execute("DROP TABLE %s" % table_name)
+                cur.execute("DROP TABLE %s" % table_name)
             cur.close()
             return True
         return False
 
     def __del__(self):
         self.con.close()
-
-
