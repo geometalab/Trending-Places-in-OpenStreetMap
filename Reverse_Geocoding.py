@@ -167,8 +167,7 @@ class FormatOSMTrendingNames(ReverseGeoCode):
         ellipsis = '...'
 
         for name in final_names:
-            name, country = name.split('(')
-            country = '(' + country
+            name, _ = name.split('(')
             name = name.strip()
 
             if name.count(',') > 0:
@@ -181,14 +180,12 @@ class FormatOSMTrendingNames(ReverseGeoCode):
                 if len(temp[len(temp) - 1]) < min_len:
                     name = name.replace(temp[len(temp) - 1], '').strip()
                 name += ellipsis
-            else:
-                name += ' '
 
-            if len(value + name + country + ', ') <= char_limit:
-                value += name + country + ', '
+            if len(value + name + ', ') <= char_limit:
+                value += name + ', '
             else:
-                if len(value + name + country) <= char_limit:
-                    value += name + country
+                if len(value + name) <= char_limit:
+                    value += name
                 else:
                     value = value[:value.rfind(', ')]
                 final_len = len(value + ellipsis)
