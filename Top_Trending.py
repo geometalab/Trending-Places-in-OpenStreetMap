@@ -195,7 +195,7 @@ def get_country(df,iso):
 
 
 def check_data_validity(df, period):
-    if len(df.date.unique()) != period:
+    if len(df.date.unique()) < period:
         return False
     return True
 
