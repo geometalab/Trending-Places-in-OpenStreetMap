@@ -57,6 +57,27 @@
   <p></p>
   <p>Say for two places <i>TouristyPlace_A, UnseenVillage_B</i> the relative hike in views from average is 20%. However, 20% of the <i>TouristyPlace_A</i> is about 500 views, while that of an <i>UnseenVillage_B</i> is 20 people. Thus, the trend is TouristyPlace_A will be considered more significant and ranked higher than UnseenVillage_B.</p>
 </ul>
+<h3>Anonymization of tile logs</h3>
+          <p>The tile log views of the slippy map of OpenStreetMap (OSM) are logged and published daily with a lag of 2 days.
+          The log never contains less than 10 hits for any given tile and it is accessed at least 10 times by 3 different IP Addresses
+          The pseudo-code for this anonymization as provided by Matt Amos (OSM) is as follows:</br>
+           <div style="white-space:PRE;background: rgba(225, 225, 225, .2);">
+for each line in all the logs
+          {
+              z, x, y = extract coordinate from line
+              ip = extract source IP address from line
+              counter[z, x, y] += 1
+              source_addresses[z, x, y].append(ip)
+            }
+            for each (z, x, y) key in counter
+          {
+              if counter[z, x, y] >= 10 {
+                if count_unique(source_addresses[z, x, y]) >= 3 {
+                  print z, x, y, counter[z, x, y]
+                }
+              }
+            }
+</div></p>
 <h3>Challenges</h3>
           <ul>
           <li><h4>Crawling activity on osm</h4></li>
