@@ -23,8 +23,15 @@ Then run the following:
 ```shell
 docker build -t trendingplaces:v1 .
 ```
+To run the main program:
+
 ```shell
 docker run -e CONSUMER_KEY -e CONSUMER_SECRET -e ACCESS_TOKEN -e ACCESS_TOKEN_SECRET trendingplaces:v1 ./main.sh
+```
+OR   
+To set it up with a cron job that executes once every day:
+```shell
+docker run -e CONSUMER_KEY -e CONSUMER_SECRET -e ACCESS_TOKEN -e ACCESS_TOKEN_SECRET trendingplaces:v1
 ```
 ## Execution manually
 
