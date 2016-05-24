@@ -16,7 +16,7 @@ These need to be set as environment variables system and/or in your docker conta
 Example: (You need to repeat this for all four or directly input it in the docker container with -e) 
 
  ```shell
-CONSUMER_KEY="somevaluehere"
+export CONSUMER_KEY="somevaluehere"
  ```
 Then run the following:
 
