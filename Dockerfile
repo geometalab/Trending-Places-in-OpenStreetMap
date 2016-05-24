@@ -21,4 +21,6 @@ ADD . /src
 RUN crontab crons.conf \
 	chmod 777 main.sh
 
+ENV PYTHONUNBUFFERED=non-empty-string
+ENV PYTHONIOENCODING=utf-8
 CMD ["cron","-f"]
