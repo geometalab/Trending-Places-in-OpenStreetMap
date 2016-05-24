@@ -52,7 +52,7 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folde
         for cluster in clusters:
             places.add(max_from_cluster(cluster, data))
         ax.set_prop_cycle(plt.cycler('color', ['r', 'b', 'yellow'] + [plt.cm.Accent(i) for i in np.linspace(0, 1, limit-3)]
-                                     ) + plt.cycler('linestyle', ['-', '-', '-', '-', '-', ':', ':', ':', ':', ':']))
+                                     ) + plt.cycler('linestyle', ['-', '-', '-', '-', '-', '--', '--', '--', '--', '--']))
         frame = export(places, clusters, data)
         frame.sort_values('trending_rank', ascending=False, inplace=True)
         for i in range(len(frame)):
