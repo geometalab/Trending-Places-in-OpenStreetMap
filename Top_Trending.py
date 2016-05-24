@@ -51,8 +51,12 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folde
         places, clusters = top_trending(data, limit)
         for cluster in clusters:
             places.add(max_from_cluster(cluster, data))
-        ax.set_prop_cycle(plt.cycler('color', [plt.cm.Accent(i) for i in np.linspace(0, 1, limit)]))
-        for item in places:
+        ax.set_prop_cycle(plt.cycler('color', ['r', 'b', 'yellow'] + [plt.cm.Accent(i) for i in np.linspace(0, 1, limit-3)]
+                                     ) + plt.cycler('linestyle', ['-', '-', '-', '-', '-', ':', ':', ':', ':', ':']))
+        frame = export(places, clusters, data)
+        frame.sort_values('trending_rank', ascending=False, inplace=True)
+        for i in range(len(frame)):
+            item = frame.index[i]
             lat, lon, country = item
             result_items = ReverseGeoCode().get_address_attributes(lat, lon, 10, 'city', 'country_code')
             if 'city' not in result_items.keys():
@@ -73,7 +77,6 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folde
         plt.tight_layout()
         db = TrendingDb()
         db.update_table_img(plt, str(day.date()), region=country_code)
-        export(places, clusters, data)
         plt.close()
 
 
@@ -101,6 +104,7 @@ def export(places, clusters, data):
     frame['last_day'] = frame['last_day'].dt.date
     db = TrendingDb()
     db.update_table(frame)
+    return frame
 
 
 def identify_cluster(trending_places):
