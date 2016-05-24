@@ -71,7 +71,7 @@ def plot_graphs(df, trending_daily, day_from, day_to, limit, country_code, folde
         ax.tick_params(axis='both', which='major', labelsize=10)
         ax.set_yscale("log", nonposy='clip')
         plt.xlabel('Date', fontsize='small', verticalalignment='baseline', horizontalalignment='right')
-        plt.ylabel('Total number of views', fontsize='small', verticalalignment='center', horizontalalignment='center', labelpad=6)
+        plt.ylabel('Total number of views (log)', fontsize='small', verticalalignment='center', horizontalalignment='center', labelpad=6)
         gp.legend(loc='best', fontsize='xx-small', ncol=2)
         gp.set_title('Top 10 OSM trending places on ' + str(day.date()), {'fontsize': 'large', 'verticalalignment': 'bottom'})
         plt.tight_layout()
