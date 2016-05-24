@@ -4,7 +4,7 @@
 tile_log_diff="2"
 date_diff="7"
 
-date_to=$(date "--date=${dataset_date} -${tile_log_diff} day" +%Y-%m-%d)
+date_to=$(date "--date=-${tile_log_diff} day" +%Y-%m-%d)
 date_from=$(date "--date=${date_to} -${date_diff} day+1 day" +%Y-%m-%d)
 
 python3 Fetch2.py --date_from=$date_from --date_to=$date_to >Trends.csv &&
