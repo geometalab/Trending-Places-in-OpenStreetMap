@@ -10,7 +10,7 @@ import os
 TWITTER_STATUS_LIMIT = 116  # with image
 DATE = (dt.datetime.now() - dt.timedelta(days=2)).replace(hour=0, minute=0, second=0, microsecond=0)
 REGION = 'world'  # Hard coded for now
-ERROR_MSG = 'Trending places bot has been unable to find data for the last few days...It will return tomorrow'
+ERROR_MSG = 'Trending places bot has been unable to find data for the last few days... It will return tomorrow'
 
 
 class TrendingTweepy:
