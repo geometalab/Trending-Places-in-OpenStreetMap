@@ -131,13 +131,48 @@ for each line in all the logs
 
 <h3>More about the code</h3>
           <ul>
-          <li>Currently, the code fetches data for past 7 days(default). This value can be changed to
-          'n' days for a greater sample accuracy. Top 10 trending places are stored by default. Even this value can be changed
-          to store more than 10 places.</li>
-          <li>The code 'Top_trending.py' can also provide output for trending places over a range of dates at once. However,
+          <li><u>Increase the sampling from 7 days to greater</u>: Currently, the code fetches data for past 7 days(default). This value can be changed to
+          'n' days for a greater sample accuracy by adding an input parameter --period 'x'. However, 7 is the minimum required data.
+              Top 10 trending places are stored by default. Even this value can be changed
+          to store more than 10 places by specifying --count.</li>
+          <li>The code 'Top_trending.py' <b><u>can also provide output for trending places over a range of dates at once</u></b>. However,
           sufficient data should be fetched from Fetch2.py depending on your period and your range of dates.
           For example to get all trending places from 4th May, 2016 to 7th May, 2016, the data must be fetched from
-          28th May, 2016 up to 7th May, 2016 (for a 7 day oeriod). It can then find the top trending places and graphs at once.</li>
+          28th May, 2016 up to 7th May, 2016 (for a 7 day period). It can then find the top trending places and graphs at once.
+          However, the twitter bot only tweets the items for the current date - lag. So it will be have to extracted
+          manually from the database trending_places.db manually.
+          <p>This can be done by <div style="white-space:PRE;background: rgba(225, 225, 225, .2);">
+              from Reverse_Geocoding import FormatOSMTrendingNames, ReverseGeoCode
+                  # Set a date
+                  date='2016-05-04'
+                  # For printing the names
+                  print(FormatOSMTrendingNames().get_cities_from_file(date,'world' ,300))
+                  # For getting the graph
+                  print (FormatOSMTrendingNames.get_trending_graph(date,'world'))
+              </div>
+              The graph is stored under the name Tile_log\Trending_Graphs.png. The 'world' parameter
+              implies that the trending places are obtained world wide. If the country parameter is specified
+              for running Top_trending.py, then 'world' can be changed to the country code such as 'CH' in order
+              to get the top trending places of that country.</p></li>
+          <li><u>Structure of trending_db database</u>:
+              <div style="white-space:PRE;background: rgba(225, 225, 225, .2);">
+          world_or_region ¦ lat ¦ lon ¦ country_code ¦ last_day ¦ view_last_day ¦ zoom ¦ tms_x ¦ tms_y ¦
+              t_score ¦ rolling_median ¦ abs_med ¦ trending_rank
+          </div>
+          The 'world_or_region' stores where the results are world wide or specific to a country and 'last_day' stores
+          the date on whic a place is trending. The res of the columns are pretty self explainatory.</li>
+          <li>Currently, the tile views are aggregated at zoom level 10. For each higher zoom level, the time taken by the program
+          increases since the number of tiles increases four times. The bottleneck of the program is the 'resampling' function
+          where the data is resampled to fill missing dates with value zero for every place</li>
+          <li><b>How to increase the speed due to the resampling?</b> A Cache folder exists in the program that stores the
+          resampled values in a csv file. At the moment, the Twitter Bot tweets only once daily, worldwide but if it
+          is extended in the future to support trending places per country etc. The resampled file is simply extracted from
+          the Cache folder and then it takes less than five minutes to continue the rest of the processing. At the moment, the resampled
+          file is automatically deleted by the program if its modification date is not the current date. For quick analysis
+          or debugging of the code, you can store a copy of any resampled file on your computer. You can copy this file to the
+          Cache folder and run the program for the given date for faster results. If you simply open the resampled file and save it once to set
+          the modified date at current date, the program will not delete it from the Cache while running.<u>A sample is available
+          under docs on Github</u></li>
           </ul>
 <h3>
 <a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authors and Contributors</h3>
