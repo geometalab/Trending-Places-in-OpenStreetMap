@@ -18,9 +18,10 @@ RUN pip3 install -r requirements.txt
 
 ADD . /src
 
-RUN crontab crons.conf \
-	chmod 777 main.sh
+RUN chmod 777 main.sh
+
+RUN	chmod 777 run_cron.sh
 
 ENV PYTHONUNBUFFERED=non-empty-string
 ENV PYTHONIOENCODING=utf-8
-CMD ["cron","-f"]
+CMD ["./run_cron.sh"]
