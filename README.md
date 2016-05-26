@@ -68,6 +68,35 @@ Step 1 and 2 are based on previous work done by Lucas Martinelli and Pavel Tysla
 - *STEP 4:* ``` python3 Trending_Bot.py```
   Before running this twitter bot, you will need to set up your twitter developer account and **add in the consumer and token access keys as environment variables in your system before this**! A sample format is available on github.
 
+## Debug the code faster
+*For Fetch2.py*
+- In the first run Fetch2.py gets a few files. This takes longer to run in the first time, but runs faster later on.
+- For testing purposes, you can just run Fetch2.py once and keep those files permanently. (And/or add them to the docker container if needed)
+- The `date_to` and `date_from` refer to the range of dates where you want to fetch the log stats from. This can be shortened,
+in order to run the code faster.
+
+*For Bubble.py**
+- The program takes in the parameters `--min_zoom=10 --max_zoom=19 --min_subz=10 --max_subz=10`. On reducing max/min_subz/zoom to lower zoom levels, the program will run faster, including STEP 3 Top_trending.
+
+*For Top_Trending.py*
+- Store any file of the resampled values (an example is inside docs) in a folder called 'Cache'. The file must be last modified on the current day of testing otherwise, the Cache will be automatically emptied. So just open and save it once so that you dont have keep pasting it inside Cache again and again.
+- Note 1: When you do this please ensure a `--date` parameter is set correctly in the command. For example, the date for the sample file provided is 2016-05-04.
+- Note 2: If you use a resampled file, it does not matter what were the contents of the `Zoom10Tiles` file from Step 2 described under running the code. Thus, Step 1 and 2 of the code can be tested separately as well. As mentioned reducing the range of dates (See `date_to` and `date_from`in ./main.sh) can speed them up for testing as well. 
+
+An example for commands for testing the program with faster speed (you can store resampled values in Cache as an additional step the --date must be set correctly):  
+```shell
+tile_log_diff="2"
+date_diff="1"
+
+date_to=$(date "--date=-${tile_log_diff} day" +%Y-%m-%d)
+date_from=$(date "--date=${date_to} -${date_diff} day+1 day" +%Y-%m-%d)
+
+python3 Fetch2.py --date_from=$date_from --date_to=$date_to >Trends.csv &&
+cat Trends.csv|python3 Bubble.py --date_precision=1d --min_zoom=5 --max_zoom=10 --min_subz=5 --max_subz=5 --no_per_day>Zoom10Tiles.csv &&
+cat Zoom10Tiles.csv | python3 Top_Trending.py --graph --date=$date_to
+python3 Trending_bot.py
+
+```
 
 For further explaination, please read:
 See http://geometalab.github.io/Trending-Places-in-OpenStreetMap
