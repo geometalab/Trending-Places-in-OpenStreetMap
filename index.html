@@ -139,9 +139,10 @@ for each line in all the logs
           sufficient data should be fetched from Fetch2.py depending on your period and your range of dates.
           For example to get all trending places from 4th May, 2016 to 7th May, 2016, the data must be fetched from
           28th May, 2016 up to 7th May, 2016 (for a 7 day period). It can then find the top trending places and graphs at once.
-          However, the twitter bot only tweets the items for the current date - lag. So it will be have to extracted
-          manually from the database trending_places.db manually.
-          <p>This can be done by <div style="white-space:PRE;background: rgba(225, 225, 225, .2);">
+          However, the twitter bot only tweets the items for ONE DAY ONLY(the current date - lag). So  the rest of the days will have to be extracted
+          manually from the database trending_places.db.
+          <p>This can be done by (you can iterate over your date range by using a for loop, this example if for
+              a particular date) <div style="white-space:PRE;background: rgba(225, 225, 225, .2);">
               from Reverse_Geocoding import FormatOSMTrendingNames, ReverseGeoCode
                   # Set a date
                   date='2016-05-04'
