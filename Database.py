@@ -1,6 +1,7 @@
 import sqlite3
 import pandas as pd
 import io
+import os
 
 CREATE_QUERY_TP = '''CREATE TABLE trending_places(
                     last_day TEXT,
@@ -31,7 +32,8 @@ WORLD = 'world'
 class TrendingDb:
 
     def __init__(self, db_name='trending_places.db'):
-        self.con = sqlite3.connect(db_name)
+        db_name_lookup = os.environ.get('DB_NAME', db_name)
+        self.con = sqlite3.connect(db_name_lookup)
 
     def _check_existing(self, table_name):
         """
