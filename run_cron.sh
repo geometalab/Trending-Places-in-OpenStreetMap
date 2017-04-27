@@ -7,4 +7,4 @@ env | cat - crons.conf > cron2.conf
 crontab cron2.conf
 
 # Run cron daemon
-cron -f
+cron -f -L 7 >/var/log/cron.log 2>&1
