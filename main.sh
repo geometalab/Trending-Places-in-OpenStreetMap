@@ -4,6 +4,8 @@
 # bail out in case of errors
 set -e
 
+date_fmt="${DATE_FMT:--u -Iseconds}"
+
 exec >$(date +%Y%m%d%H%M%S).log 2>&1
 
 tile_log_diff="2"
@@ -17,9 +19,9 @@ mkdir -p $output_dir
 
 logged_cmd()
 {
-	echo "$(date +%Y%m%d%H%M%S): Executing [$@]"
-	sh -c +e "$@"
-	echo "$(date +%Y%m%d%H%M%S): Done"
+  echo "$(date $date_fmt): Executing [$@]"
+  sh -c -e "$@"
+  echo "$(date $date_fmt): Done"
 }
 
 _errcode=0
@@ -27,35 +29,35 @@ _exitprocmsg="FAILED previous step, aborting with exitcode"
 
 exitprocINT()
 {
-	_errcode=$?
-	exitproc "INT"
+  _errcode=$?
+  exitproc "INT"
 }
 exitprocHUP()
 {
-	_errcode=$?
-	exitproc "HUP"
+  _errcode=$?
+  exitproc "HUP"
 }
 exitprocTERM()
 {
-	_errcode=$?
-	exitproc "TERM"
+  _errcode=$?
+  exitproc "TERM"
 }
 exitprocKILL()
 {
-	_errcode=$?
-	exitproc "KILL"
+  _errcode=$?
+  exitproc "KILL"
 }
 exitprocEXIT()
 {
-	_errcode=$?
-	exitproc "EXIT"
+  _errcode=$?
+  exitproc "EXIT"
 }
 
 exitproc()
 {
-	locSigName=${1:-4};
-	printf "%s: got SIG%s; %s %s\n" "$(date +%Y%m%d%H%M%S)" "${locSigName}" "$_exitprocmsg" "$_errcode"
-	exit $_errcode;
+  locSigName=${1:-4};
+  printf "%s: got SIG%s; %s %s\n" "$(date $date_fmt)" "${locSigName}" "$_exitprocmsg" "$_errcode"
+  exit $_errcode;
 }
 
 trap exitprocINT INT
