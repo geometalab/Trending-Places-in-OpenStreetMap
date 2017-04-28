@@ -11,6 +11,9 @@ date_diff="7"
 
 date_to=$(date "--date=-${tile_log_diff} day" +%Y-%m-%d)
 date_from=$(date "--date=${date_to} -${date_diff} day+1 day" +%Y-%m-%d)
+min_zoom=${MIN_ZOOM:-10}
+max_zoom=${MAX_ZOOM:-19}
+min_cache_zoom=${MIN_CACHE_ZOOM:-$min_zoom}
 
 output_dir="$(readlink -e ${OUTPUT_DIR:-.})/"
 mkdir -p $output_dir
@@ -64,8 +67,8 @@ trap exitprocTERM TERM
 trap exitprocKILL KILL
 trap exitprocEXIT EXIT
 
-logged_cmd "python3 Fetch2.py --date_from=$date_from --date_to=$date_to >${output_dir}Trends.csv"
-logged_cmd "test -r ${output_dir}Trends.csv && cat ${output_dir}Trends.csv | python3 Bubble.py --date_precision=1d --min_zoom=10 --max_zoom=19 --min_subz=10 --max_subz=10 --no_per_day >${output_dir}Zoom10Tiles.csv"
+logged_cmd "python3 Fetch2.py --date_from=$date_from --date_to=$date_to --min_zoom=$min_zoom --max_zoom=$max_zoom --min_cache_zoom=$min_cache_zoom >${output_dir}Trends.csv"
+logged_cmd "test -r ${output_dir}Trends.csv && cat ${output_dir}Trends.csv | python3 Bubble.py --date_precision=1d --min_zoom=$min_zoom --max_zoom=$max_zoom --min_subz=$min_zoom --max_subz=$min_zoom --no_per_day >${output_dir}Zoom10Tiles.csv"
 logged_cmd "test -r ${output_dir}Zoom10Tiles.csv && cat ${output_dir}Zoom10Tiles.csv | python3 Top_Trending.py --graph --date=$date_to"
 logged_cmd "python3 Trending_Bot.py"
 _exitprocmsg="SUCCESS, program terminated with exitcode"
